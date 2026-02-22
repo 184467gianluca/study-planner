@@ -2,7 +2,7 @@
 
 import { useCourses } from "@/context/CourseContext";
 import { Card, CardContent } from "@/components/ui/Card";
-import { CheckCircle2, CircleDashed, Clock } from "lucide-react";
+import { CheckCircle2, CircleDashed, Clock, GraduationCap, Star, FileText, MessageCircle, Calendar } from "lucide-react";
 
 export default function RoadmapView() {
     const { courses, startSeason } = useCourses();
@@ -86,27 +86,67 @@ export default function RoadmapView() {
                                                     <Card key={course.id} className={`border shadow-sm transition-all hover:bg-surface-hover ${getCategoryStyles(course.category)} relative overflow-hidden`}>
                                                         {/* Status Indicator Strip */}
                                                         <div className={`absolute left-0 top-0 bottom-0 w-1 ${course.status === "completed" ? "bg-success" :
-                                                                course.status === "in-progress" ? "bg-primary" :
-                                                                    "bg-foreground-muted"
+                                                            course.status === "in-progress" ? "bg-primary" :
+                                                                "bg-foreground-muted"
                                                             }`} />
 
                                                         <CardContent className="p-4 pl-5">
                                                             <div className="flex justify-between items-start mb-2 gap-2">
-                                                                <h3 className="font-semibold text-sm leading-snug">
-                                                                    {course.name}
-                                                                </h3>
-                                                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-black/30 font-medium shrink-0">
-                                                                    {course.credits} CP
-                                                                </span>
+                                                                <div className="flex flex-col gap-1">
+                                                                    <div className="flex items-center gap-1.5">
+                                                                        <h3 className="font-semibold text-sm leading-snug">
+                                                                            {course.name}
+                                                                        </h3>
+                                                                        {course.countsTowardsFinalGrade && (
+                                                                            <span title="Counts towards B.Sc. Grade">
+                                                                                <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500/20 shrink-0" />
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                    {/* Rich Metadata row 1: CP & Grade */}
+                                                                    <div className="flex items-center gap-2 text-[10px] font-medium">
+                                                                        <span className="px-1.5 py-0.5 rounded bg-black/30 shrink-0">
+                                                                            {course.credits} CP
+                                                                        </span>
+                                                                        {course.status === "completed" && course.isGraded !== false && course.grade && course.grade <= 4.0 && (
+                                                                            <span className="px-1.5 py-0.5 rounded bg-success/20 text-success shrink-0 border border-success/30 flex items-center gap-1">
+                                                                                <GraduationCap className="w-3 h-3" />
+                                                                                Grade: {course.grade.toFixed(1)}
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
                                                             </div>
 
-                                                            <div className="flex items-center justify-between mt-3 text-[10px]">
+                                                            {/* Rich Metadata row 2: Workload & Exams */}
+                                                            <div className="flex flex-wrap items-center gap-2 mt-2 text-[10px] opacity-80">
+                                                                {((course.sws || 0) + (course.exerciseSws || 0)) > 0 && (
+                                                                    <span className="flex items-center gap-1 bg-surface px-1.5 py-0.5 rounded border border-border">
+                                                                        <Clock className="w-3 h-3" />
+                                                                        {(course.sws || 0) + (course.exerciseSws || 0)} SWS
+                                                                    </span>
+                                                                )}
+                                                                {course.examType && course.examType !== "none" && (
+                                                                    <span className="flex items-center gap-1 bg-surface px-1.5 py-0.5 rounded border border-border" title={`${course.examType} Exam`}>
+                                                                        {course.examType === 'written' ? <FileText className="w-3 h-3" /> : <MessageCircle className="w-3 h-3" />}
+                                                                        <span className="capitalize">{course.examType}</span>
+                                                                    </span>
+                                                                )}
+                                                                {course.offeredIn && course.offeredIn !== "both" && (
+                                                                    <span className="flex items-center gap-1 bg-surface px-1.5 py-0.5 rounded border border-border">
+                                                                        <Calendar className="w-3 h-3" />
+                                                                        {course.offeredIn}
+                                                                    </span>
+                                                                )}
+                                                            </div>
+
+                                                            <div className="flex items-center justify-between mt-3 text-[10px] pt-3 border-t border-border/50">
                                                                 <span className="opacity-70 capitalize bg-background/50 px-2 py-1 rounded">
                                                                     {course.category}
                                                                 </span>
                                                                 <div className={`flex items-center gap-1.5 font-medium ${course.status === "completed" ? "text-success" :
-                                                                        course.status === "in-progress" ? "text-primary" :
-                                                                            "text-foreground-muted"
+                                                                    course.status === "in-progress" ? "text-primary" :
+                                                                        "text-foreground-muted"
                                                                     }`}>
                                                                     {course.status === "completed" ? <CheckCircle2 className="w-3.5 h-3.5" /> :
                                                                         course.status === "in-progress" ? <Clock className="w-3.5 h-3.5" /> :

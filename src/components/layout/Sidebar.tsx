@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, BookOpen, Map, GanttChartSquare } from "lucide-react";
+import { LayoutDashboard, BookOpen, Map } from "lucide-react";
 
 export function Sidebar() {
     const pathname = usePathname();
@@ -11,7 +11,6 @@ export function Sidebar() {
         { name: "Dashboard", href: "/", icon: LayoutDashboard },
         { name: "Course Manager", href: "/manager", icon: BookOpen },
         { name: "Roadmap", href: "/roadmap", icon: Map },
-        { name: "Timeline", href: "/timeline", icon: GanttChartSquare },
     ];
 
     return (
@@ -32,8 +31,8 @@ export function Sidebar() {
                                 key={link.name}
                                 href={link.href}
                                 className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 ${isActive
-                                        ? "bg-primary/10 text-primary shadow-[inset_4px_0_0_0_rgba(0,229,255,1)]"
-                                        : "text-foreground-muted hover:bg-surface-hover hover:text-foreground"
+                                    ? "bg-primary/10 text-primary shadow-[inset_4px_0_0_0_rgba(0,229,255,1)]"
+                                    : "text-foreground-muted hover:bg-surface-hover hover:text-foreground"
                                     }`}
                             >
                                 <Icon className={`h-5 w-5 ${isActive ? "text-primary" : ""}`} />
