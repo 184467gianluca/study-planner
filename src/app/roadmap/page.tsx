@@ -2,12 +2,10 @@
 
 import { useCourses } from "@/context/CourseContext";
 import { Card, CardContent } from "@/components/ui/Card";
-import { Map, CheckCircle2, CircleDashed, Clock } from "lucide-react";
+import { CheckCircle2, CircleDashed, Clock } from "lucide-react";
 
 export default function RoadmapView() {
     const { courses, startSeason } = useCourses();
-
-    const sortedCourses = [...courses].sort((a, b) => a.semester - b.semester);
 
     const getSeasonForSemester = (sem: number) => {
         const isStartWiSe = startSeason === "WiSe";
@@ -15,8 +13,6 @@ export default function RoadmapView() {
         if (isStartWiSe) return isOdd ? "WiSe" : "SoSe";
         return isOdd ? "SoSe" : "WiSe";
     };
-
-    const topLevelCourses = sortedCourses.filter(c => !c.parentModuleId);
 
     const getCategoryStyles = (category?: string) => {
         switch (category) {
@@ -28,79 +24,111 @@ export default function RoadmapView() {
         }
     };
 
+    // Phase 9: Group courses strictly by semester for the new Kanban layout
+    const coursesBySemester = courses.reduce((acc, course) => {
+        const sem = course.semester;
+        if (!acc[sem]) acc[sem] = [];
+        acc[sem].push(course);
+        return acc;
+    }, {} as Record<number, typeof courses>);
+
+    // Get a sorted array of the semester numbers that actually have courses
+    const activeSemesters = Object.keys(coursesBySemester)
+        .map(Number)
+        .sort((a, b) => a - b);
+
     return (
         <div className="space-y-6 h-[calc(100vh-8rem)] flex flex-col">
             <div>
-                <h1 className="text-3xl font-bold tracking-tight text-white">
+                <h1 className="text-3xl font-bold tracking-tight text-white drop-shadow-[0_0_8px_rgba(0,229,255,0.2)]">
                     Roadmap
                 </h1>
                 <p className="text-foreground-muted mt-2">
-                    High-level semester journey.
+                    Visual layout of your entire B.Sc. plan, sorted by semester.
                 </p>
             </div>
 
-            {sortedCourses.length === 0 ? (
+            {activeSemesters.length === 0 ? (
                 <Card>
                     <CardContent className="py-12 text-center text-foreground-muted">
                         No courses available to generate roadmap.
                     </CardContent>
                 </Card>
             ) : (
-                <div className="flex-1 overflow-x-auto relative pb-8 mt-4 custom-scrollbar">
-                    <div className="flex items-center absolute top-1/2 left-0 right-0 h-1 bg-border -translate-y-1/2 min-w-max px-8 z-0"></div>
-
-                    <div className="flex items-center space-x-12 px-8 min-w-max h-full z-10 relative">
-                        {topLevelCourses.map((course, index) => {
-                            const childCourses = sortedCourses.filter(c => c.parentModuleId === course.id);
+                <div className="flex-1 overflow-x-auto overflow-y-hidden pb-4 custom-scrollbar">
+                    <div className="flex gap-6 h-full items-start min-w-max pb-4 px-2">
+                        {activeSemesters.map(semesterNum => {
+                            const semesterCourses = coursesBySemester[semesterNum];
+                            const totalCP = semesterCourses.reduce((acc, c) => acc + (c.credits || 0), 0);
+                            const season = getSeasonForSemester(semesterNum);
 
                             return (
-                                <div key={course.id} className="relative flex flex-col justify-center w-72 h-full">
-                                    {/* Node dot on the line */}
-                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
-                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center bg-background border ${course.status === "completed" ? "border-success text-success" :
-                                            course.status === "in-progress" ? "border-primary text-primary" :
-                                                "border-foreground-muted text-foreground-muted"
-                                            }`}>
-                                            {course.status === "completed" ? <CheckCircle2 className="w-4 h-4" /> :
-                                                course.status === "in-progress" ? <Clock className="w-4 h-4" /> :
-                                                    <CircleDashed className="w-4 h-4" />}
+                                <div key={`sem-${semesterNum}`} className="flex flex-col w-[320px] max-h-full shrink-0">
+                                    {/* Column Header */}
+                                    <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-md pb-4 mb-2 border-b border-border">
+                                        <div className="flex justify-between items-baseline mb-1">
+                                            <h2 className="text-lg font-bold text-foreground">Semester {semesterNum}</h2>
+                                            <span className="text-xs font-medium text-foreground-muted uppercase tracking-wider bg-surface px-2 py-0.5 rounded-full">
+                                                {season}
+                                            </span>
                                         </div>
+                                        <p className="text-sm text-primary font-medium">{totalCP} Total CP</p>
                                     </div>
 
-                                    {/* Card below or above the line alternating */}
-                                    <div className={`transition-transform hover:-translate-y-1 ${index % 2 === 0 ? "mt-40 mb-0" : "-mt-40 mb-40"}`}>
-                                        <Card className={`border shadow-sm bg-background/50 backdrop-blur-sm ${getCategoryStyles(course.category)}`}>
-                                            <CardContent className="p-4">
-                                                <div className="flex justify-between items-start mb-2">
-                                                    <span className="text-[10px] font-semibold tracking-wider uppercase opacity-80">
-                                                        Sem {course.semester} ({getSeasonForSemester(course.semester)})
-                                                    </span>
-                                                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-black/20 font-medium">
-                                                        {course.credits} CP
-                                                    </span>
-                                                </div>
-                                                <h3 className="font-semibold text-sm leading-snug mb-2">
-                                                    {course.name}
-                                                </h3>
-                                                {course.category && (
-                                                    <div className="text-[10px] opacity-70 capitalize mb-1">
-                                                        {course.category}
-                                                    </div>
-                                                )}
+                                    {/* Scrollable Column Content (The Cards) */}
+                                    <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar pb-2">
+                                        {semesterCourses
+                                            .filter(c => !c.parentModuleId) // Only render top-level courses as main cards
+                                            .map(course => {
+                                                const childCourses = semesterCourses.filter(c => c.parentModuleId === course.id);
 
-                                                {childCourses.length > 0 && (
-                                                    <div className="mt-3 pt-3 border-t border-black/10 space-y-1.5">
-                                                        <p className="text-[10px] font-medium uppercase opacity-70 mb-2">Assigned Modules</p>
-                                                        {childCourses.map(child => (
-                                                            <div key={child.id} className={`p-2 rounded border text-[11px] flex justify-between items-center bg-background/80 ${getCategoryStyles(child.category)}`}>
-                                                                <span className="font-medium truncate mr-2" title={child.name}>{child.name}</span>
-                                                                <span className="whitespace-nowrap opacity-80">{child.credits} CP</span>
+                                                return (
+                                                    <Card key={course.id} className={`border shadow-sm transition-all hover:bg-surface-hover ${getCategoryStyles(course.category)} relative overflow-hidden`}>
+                                                        {/* Status Indicator Strip */}
+                                                        <div className={`absolute left-0 top-0 bottom-0 w-1 ${course.status === "completed" ? "bg-success" :
+                                                                course.status === "in-progress" ? "bg-primary" :
+                                                                    "bg-foreground-muted"
+                                                            }`} />
+
+                                                        <CardContent className="p-4 pl-5">
+                                                            <div className="flex justify-between items-start mb-2 gap-2">
+                                                                <h3 className="font-semibold text-sm leading-snug">
+                                                                    {course.name}
+                                                                </h3>
+                                                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-black/30 font-medium shrink-0">
+                                                                    {course.credits} CP
+                                                                </span>
                                                             </div>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                            </CardContent>
-                                        </Card>
+
+                                                            <div className="flex items-center justify-between mt-3 text-[10px]">
+                                                                <span className="opacity-70 capitalize bg-background/50 px-2 py-1 rounded">
+                                                                    {course.category}
+                                                                </span>
+                                                                <div className={`flex items-center gap-1.5 font-medium ${course.status === "completed" ? "text-success" :
+                                                                        course.status === "in-progress" ? "text-primary" :
+                                                                            "text-foreground-muted"
+                                                                    }`}>
+                                                                    {course.status === "completed" ? <CheckCircle2 className="w-3.5 h-3.5" /> :
+                                                                        course.status === "in-progress" ? <Clock className="w-3.5 h-3.5" /> :
+                                                                            <CircleDashed className="w-3.5 h-3.5" />}
+                                                                    <span className="capitalize">{course.status}</span>
+                                                                </div>
+                                                            </div>
+
+                                                            {childCourses.length > 0 && (
+                                                                <div className="mt-3 pt-3 border-t border-black/10 space-y-1.5">
+                                                                    {childCourses.map(child => (
+                                                                        <div key={child.id} className={`px-2 py-1.5 rounded border text-[11px] flex justify-between items-center bg-background/80 ${getCategoryStyles(child.category)}`}>
+                                                                            <span className="font-medium truncate mr-2" title={child.name}>{child.name}</span>
+                                                                            <span className="whitespace-nowrap opacity-80">{child.credits} CP</span>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            )}
+                                                        </CardContent>
+                                                    </Card>
+                                                );
+                                            })}
                                     </div>
                                 </div>
                             );
@@ -110,22 +138,21 @@ export default function RoadmapView() {
             )}
 
             <style jsx global>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          height: 12px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: rgba(15, 22, 41, 0.5);
-          border-radius: 8px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(0, 229, 255, 0.2);
-          border-radius: 8px;
-          border: 2px solid rgba(15, 22, 41, 1);
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(0, 229, 255, 0.5);
-        }
-      `}</style>
+                .custom-scrollbar::-webkit-scrollbar {
+                    width: 6px;
+                    height: 8px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-track {
+                    background: transparent;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb {
+                    background: rgba(255, 255, 255, 0.1);
+                    border-radius: 4px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                    background: rgba(255, 255, 255, 0.2);
+                }
+            `}</style>
         </div>
     );
 }

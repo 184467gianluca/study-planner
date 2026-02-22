@@ -10,8 +10,6 @@ export default function Dashboard() {
   // Helper: check if a course is passed
   const isPassed = (c: any) => !c.isGraded || (c.isGraded && c.grade && c.grade <= 4.0);
 
-  // Grouping logic for the new Hover Tooltip
-  const groupedForTooltip = new Map<string, { name: string, cp: number, grade: number }>();
 
 
   // Progress calculations (Only count CP if passed)
@@ -55,23 +53,11 @@ export default function Dashboard() {
           // Add the grouped CP and weight it ONCE by the shared grade
           totalGradedCP += compositeCP;
           weightedSum += (course.grade || 0) * compositeCP;
-
-          groupedForTooltip.set(course.compositeExamId, {
-            name: `${course.name.split(' ')[0]} Composite`, // Simplistic naming for the group
-            cp: compositeCP,
-            grade: course.grade || 0
-          });
         }
       } else {
         // Standard standalone course
         totalGradedCP += (course.credits || 0);
         weightedSum += (course.grade || 0) * (course.credits || 0);
-
-        groupedForTooltip.set(course.id, {
-          name: course.name,
-          cp: course.credits || 0,
-          grade: course.grade || 0
-        });
       }
     });
 
@@ -153,23 +139,37 @@ export default function Dashboard() {
       </Card>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="bg-surface/60 border-primary/20 hover:border-primary/50 transition-colors">
+        <Card className="bg-surface/60 border-primary/20 hover:border-primary/50 transition-colors relative z-10">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-foreground-muted flex items-center gap-2 relative group">
               Current Grade
               <Info className="h-4 w-4 text-secondary/50 hover:text-secondary transition-colors cursor-help" />
 
               {/* Hover Tooltip Dropdown */}
-              <div className="absolute top-full left-0 mt-2 w-64 bg-surface-hover/95 backdrop-blur-md border border-border shadow-lg rounded-lg p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 pointer-events-none">
-                <p className="text-xs font-semibold text-foreground mb-2 pb-2 border-b border-border/50">Calculation Breakdown:</p>
-                <ul className="space-y-1.5 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
-                  {Array.from(groupedForTooltip.values()).map((item, idx) => (
-                    <li key={idx} className="flexjustify-between items-center text-[11px]">
-                      <span className="text-foreground-muted truncate block max-w-[150px]">{item.name}</span>
-                      <span className="text-foreground font-mono bg-surface px-1.5 py-0.5 rounded text-[10px] whitespace-nowrap">{(item.cp * item.grade).toFixed(1)} <span className="text-foreground-muted opacity-50 text-[9px]">({item.cp}CP × {item.grade.toFixed(1)})</span></span>
-                    </li>
-                  ))}
-                </ul>
+              <div className="absolute top-full left-0 mt-2 w-72 bg-surface-hover/95 backdrop-blur-md border border-border shadow-lg rounded-lg p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 pointer-events-none">
+                <p className="text-xs font-semibold text-foreground mb-2 pb-2 border-b border-border/50">Modules directly affecting the B.Sc. Grade:</p>
+                <div className="space-y-1.5 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar text-[11px] text-foreground-muted">
+                  <p className="font-medium text-foreground">Meteorology (1-fach B.Sc.):</p>
+                  <ul className="list-disc pl-4 space-y-1 mb-2">
+                    <li>Allgemeine Meteorologie (EMETA - 10 CP)</li>
+                    <li>IT & Atmosphärendynamik 1+2 (EMETB - 12 CP)</li>
+                    <li>Physik & Chemie der Atmosphäre 1 (6 CP)</li>
+                    <li>Atmosphärendynamik 3 (6 CP)</li>
+                    <li>Numerische Wettervorhersage (5 CP)</li>
+                    <li>Bachelorarbeit (12 CP)</li>
+                  </ul>
+                  <p className="font-medium text-foreground">Physics & Math:</p>
+                  <ul className="list-disc pl-4 space-y-1">
+                    <li>Mathematik für Physik 1 (8 CP)</li>
+                    <li>Mechanik & Thermodynamik (10 CP)</li>
+                    <li>Mathematik für Meteorologie 2 (8 CP)</li>
+                    <li>Elektrodynamik (8 CP)</li>
+                    <li>Theoretische Physik 2 (8 CP)</li>
+                    <li>Mathematik für Meteorologie 3 (8 CP)</li>
+                    <li>Optik (4 CP)</li>
+                    <li>Atome und Quanten (4 CP)</li>
+                  </ul>
+                </div>
               </div>
             </CardTitle>
             <TrendingUp className="h-4 w-4 text-primary" />
