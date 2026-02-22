@@ -1,3 +1,18 @@
+# Study Planner
+
+> ⚠️ **WICHTIGER HINWEIS: "VIBE CODED" PROJEKT** ⚠️  
+> **Dieses Projekt ist komplett KI-generiert ("vibe coded").** Es wurde nicht durch menschliche Hand geschrieben, sondern von einer KI auf Basis von Anweisungen (Prompts) entworfen, zusammengebaut und iteriert. 
+> 
+> Das bedeutet:
+> - Behandle diesen Code mit einer gewissen **Sorgfalt**.
+> - **Hinterfrage** Architekturentscheidungen und Logik **kritisch**.
+> - Schau **genau hin** beim Lesen, Reviewen und Verstehen der Komponentenstruktur.
+> - **Denk mit**, bevor du den Code in sicherheitskritischen oder produktiven (skalierten) Umgebungen blind einsetzt.
+> 
+> KI-gestützter Code kann oft beeindruckende Ergebnisse in Rekordzeit erzielen, aber er ersetzt (noch) nicht die methodische, architektonische und sicherheitstechnische Weitsicht eines erfahrenen Entwicklers.
+
+---
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
