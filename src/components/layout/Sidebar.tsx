@@ -2,15 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, BookOpen, Map } from "lucide-react";
+import { LayoutDashboard, BookOpen, Map, LayoutTemplate } from "lucide-react";
 
 export function Sidebar() {
     const pathname = usePathname();
 
     const links = [
         { name: "Dashboard", href: "/", icon: LayoutDashboard },
-        { name: "Course Manager", href: "/manager", icon: BookOpen },
+        { name: "Study Builder", href: "/builder", icon: LayoutTemplate },
         { name: "Roadmap", href: "/roadmap", icon: Map },
+        { name: "Course Manager", href: "/manager", icon: BookOpen },
     ];
 
     return (
