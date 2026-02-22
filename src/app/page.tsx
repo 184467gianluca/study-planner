@@ -7,9 +7,12 @@ import { BookOpen, GraduationCap, TrendingUp, Clock, AlertCircle, FileText } fro
 export default function Dashboard() {
   const { courses, currentSemester } = useCourses();
 
-  // Progress calculations
+  // Helper: check if a course is passed
+  const isPassed = (c: any) => !c.isGraded || (c.isGraded && c.grade && c.grade <= 4.0);
+
+  // Progress calculations (Only count CP if passed)
   const totalCompletedCP = courses
-    .filter(c => c.status === "completed")
+    .filter(c => c.status === "completed" && isPassed(c))
     .reduce((acc, course) => acc + (course.credits || 0), 0);
   const totalInProgressCP = courses
     .filter(c => c.status === "in-progress")
@@ -40,6 +43,14 @@ export default function Dashboard() {
   const pendingAdmissions = currentInProgress.filter(c => c.hasExercise && c.admissionStatus === 'pending').length;
   const totalWorkloadMin = currentInProgress.reduce((acc, c) => acc + (c.workloadMin || 0), 0);
   const totalWorkloadMax = currentInProgress.reduce((acc, c) => acc + (c.workloadMax || 0), 0);
+
+  // Phase 4 Metrics: Exam Attempts
+  const criticalExams = courses.filter(c =>
+    c.examType !== "none" &&
+    c.examAttemptsMax &&
+    (c.examAttemptsMax - (c.examAttemptsUsed || 0)) <= 1 &&
+    c.status !== "completed"
+  ).length;
 
   const activeCourses = currentInProgress.length;
   const completedCourses = courses.filter((c) => c.status === "completed").length;
@@ -178,6 +189,24 @@ export default function Dashboard() {
             </div>
             <p className="text-[10px] text-foreground-muted mt-1 leading-tight">
               Mandatory exercises that require successful submission.
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Phase 4: Critical Exams Card */}
+        <Card className="bg-surface/60 border-red-500/20 hover:border-red-500/50 transition-colors">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-foreground-muted">
+              Critical Attempts
+            </CardTitle>
+            <AlertCircle className={`h-4 w-4 ${criticalExams > 0 ? 'text-red-500 animate-pulse' : 'text-foreground-muted'}`} />
+          </CardHeader>
+          <CardContent>
+            <div className={`text-3xl font-bold ${criticalExams > 0 ? 'text-red-500' : 'text-foreground'}`}>
+              {criticalExams} <span className="text-sm font-normal text-foreground-muted">Exams</span>
+            </div>
+            <p className="text-[10px] text-foreground-muted mt-1 leading-tight">
+              Exams with ≤ 1 attempt remaining across all planned & active courses.
             </p>
           </CardContent>
         </Card>

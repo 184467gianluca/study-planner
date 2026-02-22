@@ -19,4 +19,9 @@ export interface Course {
     workloadMax?: number; // Estimated hours per week (max)
     admissionStatus?: "not-required" | "pending" | "granted";
     examType?: "none" | "written" | "oral";
+
+    // Phase 4: Semester Offerings & Exam Attempts
+    offeredIn?: "SoSe" | "WiSe" | "both";
+    examAttemptsMax?: number; // Usually 3
+    examAttemptsUsed?: number;
 }
