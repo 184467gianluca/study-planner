@@ -2,13 +2,17 @@
 
 import { useCourses } from "@/context/CourseContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { BookOpen, GraduationCap, TrendingUp, Clock, AlertCircle, FileText } from "lucide-react";
+import { BookOpen, GraduationCap, TrendingUp, Clock, AlertCircle, FileText, Info } from "lucide-react";
 
 export default function Dashboard() {
   const { courses, currentSemester } = useCourses();
 
   // Helper: check if a course is passed
   const isPassed = (c: any) => !c.isGraded || (c.isGraded && c.grade && c.grade <= 4.0);
+
+  // Grouping logic for the new Hover Tooltip
+  const groupedForTooltip = new Map<string, { name: string, cp: number, grade: number }>();
+
 
   // Progress calculations (Only count CP if passed)
   const totalCompletedCP = courses
@@ -24,13 +28,57 @@ export default function Dashboard() {
   const bscGoalCP = 180;
   const progressPercent = Math.min((totalCompletedCP / bscGoalCP) * 100, 100);
 
-  // Grade calculation (Aktuelle Note) - Weighted average: Sum(Grade * CP) / Sum(CP)
-  const gradedCourses = courses.filter(c => c.status === "completed" && c.isGraded !== false && c.grade);
+  // Phase 5 & 7: Grade calculation (Aktuelle Note) - Weighted average: Sum(Grade * CP) / Sum(CP)
+  // Strict Rules: Only courses with `countsTowardsFinalGrade`.
+  // Composite Exam Rule: Courses with the same `compositeExamId` act as a single mathematical block.
+  const gradedCourses = courses.filter(c => c.status === "completed" && c.isGraded !== false && c.grade && c.countsTowardsFinalGrade);
   let averageGrade = 0;
+
   if (gradedCourses.length > 0) {
-    const totalGradedCP = gradedCourses.reduce((acc, c) => acc + (c.credits || 0), 0);
-    const weightedSum = gradedCourses.reduce((acc, c) => acc + ((c.grade || 0) * (c.credits || 0)), 0);
-    averageGrade = weightedSum / totalGradedCP;
+    let totalGradedCP = 0;
+    let weightedSum = 0;
+
+    // Group courses by their composite ID, or treat standalone courses uniquely
+    const processedComposites = new Set<string>();
+
+    gradedCourses.forEach(course => {
+      if (course.compositeExamId) {
+        // Only process composite blocks once
+        if (!processedComposites.has(course.compositeExamId)) {
+          processedComposites.add(course.compositeExamId);
+
+          // Find all completed, graded parts of this composite exam
+          const compositeParts = gradedCourses.filter(c => c.compositeExamId === course.compositeExamId);
+          // Sum their CPs together
+          const compositeCP = compositeParts.reduce((acc, c) => acc + (c.credits || 0), 0);
+
+          // Add the grouped CP and weight it ONCE by the shared grade
+          totalGradedCP += compositeCP;
+          weightedSum += (course.grade || 0) * compositeCP;
+
+          groupedForTooltip.set(course.compositeExamId, {
+            name: `${course.name.split(' ')[0]} Composite`, // Simplistic naming for the group
+            cp: compositeCP,
+            grade: course.grade || 0
+          });
+        }
+      } else {
+        // Standard standalone course
+        totalGradedCP += (course.credits || 0);
+        weightedSum += (course.grade || 0) * (course.credits || 0);
+
+        groupedForTooltip.set(course.id, {
+          name: course.name,
+          cp: course.credits || 0,
+          grade: course.grade || 0
+        });
+      }
+    });
+
+    // Official Exam Rules: Keep only 1 decimal, NO ROUNDING
+    if (totalGradedCP > 0) {
+      averageGrade = Math.trunc((weightedSum / totalGradedCP) * 10) / 10;
+    }
   }
 
   // SWS calculation for current semester
@@ -107,17 +155,31 @@ export default function Dashboard() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Card className="bg-surface/60 border-primary/20 hover:border-primary/50 transition-colors">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-foreground-muted">
+            <CardTitle className="text-sm font-medium text-foreground-muted flex items-center gap-2 relative group">
               Current Grade
+              <Info className="h-4 w-4 text-secondary/50 hover:text-secondary transition-colors cursor-help" />
+
+              {/* Hover Tooltip Dropdown */}
+              <div className="absolute top-full left-0 mt-2 w-64 bg-surface-hover/95 backdrop-blur-md border border-border shadow-lg rounded-lg p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 pointer-events-none">
+                <p className="text-xs font-semibold text-foreground mb-2 pb-2 border-b border-border/50">Calculation Breakdown:</p>
+                <ul className="space-y-1.5 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
+                  {Array.from(groupedForTooltip.values()).map((item, idx) => (
+                    <li key={idx} className="flexjustify-between items-center text-[11px]">
+                      <span className="text-foreground-muted truncate block max-w-[150px]">{item.name}</span>
+                      <span className="text-foreground font-mono bg-surface px-1.5 py-0.5 rounded text-[10px] whitespace-nowrap">{(item.cp * item.grade).toFixed(1)} <span className="text-foreground-muted opacity-50 text-[9px]">({item.cp}CP × {item.grade.toFixed(1)})</span></span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </CardTitle>
             <TrendingUp className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
             <div className={`text-3xl font-bold ${averageGrade && averageGrade <= 1.5 ? 'text-success' : averageGrade && averageGrade <= 2.5 ? 'text-primary' : 'text-foreground'}`}>
-              {averageGrade ? averageGrade.toFixed(2) : "—"}
+              {averageGrade ? averageGrade.toFixed(1) : "—"}
             </div>
             <p className="text-[10px] text-foreground-muted mt-1 leading-tight">
-              Weighted mathematical average based on {gradedCourses.length} completed & graded modules
+              Calculated based on {gradedCourses.length} strictly exam-relevant modules (no rounding).
             </p>
           </CardContent>
         </Card>

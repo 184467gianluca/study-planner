@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
-import { Trash2, Pencil, Download, Upload } from "lucide-react";
+import { Trash2, Pencil, Download, Upload, Undo2, RotateCcw, Link } from "lucide-react";
 
 export default function CourseManager() {
     const {
@@ -19,7 +19,10 @@ export default function CourseManager() {
         setCurrentSemester,
         startSeason,
         setStartSeason,
-        loadCourses
+        loadCourses,
+        undo,
+        resetToDefaults,
+        canUndo
     } = useCourses();
 
     const [isEditing, setIsEditing] = useState<string | null>(null);
@@ -42,6 +45,8 @@ export default function CourseManager() {
         offeredIn: "both" as "SoSe" | "WiSe" | "both",
         examAttemptsMax: "3",
         examAttemptsUsed: "0",
+        countsTowardsFinalGrade: false,
+        compositeTargetId: "none",
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -65,7 +70,21 @@ export default function CourseManager() {
             offeredIn: formData.offeredIn,
             examAttemptsMax: formData.examType !== "none" && formData.examAttemptsMax ? Number(formData.examAttemptsMax) : undefined,
             examAttemptsUsed: formData.examType !== "none" && formData.examAttemptsUsed ? Number(formData.examAttemptsUsed) : undefined,
+            countsTowardsFinalGrade: formData.countsTowardsFinalGrade,
         };
+
+        // Phase 8: Custom Composite Exams
+        let finalCompositeId: string | undefined = undefined;
+        if (formData.compositeTargetId !== "none") {
+            const targetCourse = courses.find(c => c.id === formData.compositeTargetId);
+            if (targetCourse) {
+                finalCompositeId = targetCourse.compositeExamId || crypto.randomUUID();
+                if (!targetCourse.compositeExamId) {
+                    updateCourse(targetCourse.id, { compositeExamId: finalCompositeId });
+                }
+            }
+        }
+        courseData.compositeExamId = finalCompositeId;
 
         if (isEditing) {
             updateCourse(isEditing, courseData);
@@ -81,7 +100,7 @@ export default function CourseManager() {
         setFormData({
             name: "", credits: "", semester: "", category: "meteorology", parentModuleId: "none", sws: "", grade: "", isGraded: true,
             hasExercise: false, exerciseSws: "", workloadMin: "", workloadMax: "", admissionStatus: "not-required", examType: "written",
-            offeredIn: "both", examAttemptsMax: "3", examAttemptsUsed: "0"
+            offeredIn: "both", examAttemptsMax: "3", examAttemptsUsed: "0", countsTowardsFinalGrade: false, compositeTargetId: "none"
         });
     };
 
@@ -105,6 +124,10 @@ export default function CourseManager() {
             offeredIn: course.offeredIn || "both",
             examAttemptsMax: course.examAttemptsMax !== undefined ? String(course.examAttemptsMax) : "3",
             examAttemptsUsed: course.examAttemptsUsed !== undefined ? String(course.examAttemptsUsed) : "0",
+            countsTowardsFinalGrade: course.countsTowardsFinalGrade || false,
+            compositeTargetId: course.compositeExamId
+                ? courses.find(c => c.id !== course.id && c.compositeExamId === course.compositeExamId)?.id || "none"
+                : "none",
         });
         // Scroll to top to see form
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -217,6 +240,35 @@ export default function CourseManager() {
                                     className="hidden"
                                 />
                             </div>
+                        </div>
+                    </div>
+
+                    {/* Phase 6: Undo and Reset Section */}
+                    <div className="mt-6 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div>
+                            <h3 className="text-sm font-medium text-orange-400">Danger Zone</h3>
+                            <p className="text-xs text-foreground-muted">Revert mistakes or reset curriculum entirely.</p>
+                        </div>
+                        <div className="flex gap-3 w-full sm:w-auto">
+                            <Button
+                                variant="secondary"
+                                onClick={undo}
+                                disabled={!canUndo}
+                                className="flex-1 sm:flex-none border border-orange-500/30 text-orange-400 hover:bg-orange-500/10 hover:border-orange-500/50"
+                            >
+                                <Undo2 className="w-4 h-4 mr-2" /> Undo Last Action
+                            </Button>
+                            <Button
+                                variant="secondary"
+                                onClick={() => {
+                                    if (confirm("Are you sure you want to reset EVERYTHING to the default Meteorology curriculum? All manual changes, grades, and attempts will be lost forever.")) {
+                                        resetToDefaults();
+                                    }
+                                }}
+                                className="flex-1 sm:flex-none border border-red-500/30 text-red-500 hover:bg-red-500/10 hover:border-red-500/50"
+                            >
+                                <RotateCcw className="w-4 h-4 mr-2" /> Reset to Defaults
+                            </Button>
                         </div>
                     </div>
                 </CardContent>
@@ -413,6 +465,25 @@ export default function CourseManager() {
                                     </select>
                                 </div>
 
+                                <div className="mb-4">
+                                    <Label htmlFor="compositeTargetId">Part of Composite Exam with... (Doppelklausur)</Label>
+                                    <select
+                                        id="compositeTargetId"
+                                        value={formData.compositeTargetId}
+                                        onChange={(e) => setFormData({ ...formData, compositeTargetId: e.target.value })}
+                                        className="mt-1 flex h-10 w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors"
+                                    >
+                                        <option value="none">-- Standalone Exam --</option>
+                                        {courses
+                                            .filter(c => c.id !== isEditing) // Don't let a course link to itself
+                                            .map(c => (
+                                                <option key={c.id} value={c.id}>
+                                                    {c.name} (Sem {c.semester})
+                                                </option>
+                                            ))}
+                                    </select>
+                                </div>
+
                                 {formData.examType !== "none" && (
                                     <div className="grid grid-cols-2 gap-4 mb-4 bg-surface-hover/20 p-3 rounded-md border border-border/30">
                                         <div>
@@ -453,6 +524,21 @@ export default function CourseManager() {
                                 </div>
 
                                 {formData.isGraded && (
+                                    <div className="flex items-center justify-between mb-4">
+                                        <Label htmlFor="countsTowardsFinalGrade" className="font-medium text-secondary">Counts towards B.Sc. Final Grade?</Label>
+                                        <div className="flex items-center">
+                                            <input
+                                                id="countsTowardsFinalGrade"
+                                                type="checkbox"
+                                                checked={formData.countsTowardsFinalGrade}
+                                                onChange={(e) => setFormData({ ...formData, countsTowardsFinalGrade: e.target.checked })}
+                                                className="w-4 h-4 text-secondary bg-surface border-border rounded focus:ring-secondary focus:ring-2"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {formData.isGraded && (
                                     <div>
                                         <Label htmlFor="grade">Grade (1.0 - 5.0)</Label>
                                         <Input
@@ -483,7 +569,7 @@ export default function CourseManager() {
                                             setFormData({
                                                 name: "", credits: "", semester: "", category: "meteorology", parentModuleId: "none", sws: "", grade: "", isGraded: true,
                                                 hasExercise: false, exerciseSws: "", workloadMin: "", workloadMax: "", admissionStatus: "not-required", examType: "written",
-                                                offeredIn: "both", examAttemptsMax: "3", examAttemptsUsed: "0"
+                                                offeredIn: "both", examAttemptsMax: "3", examAttemptsUsed: "0", countsTowardsFinalGrade: false, compositeTargetId: "none"
                                             });
                                         }}
                                     >
@@ -507,7 +593,15 @@ export default function CourseManager() {
                                 <div key={course.id} className="flex flex-col bg-surface/50 border border-border rounded-lg p-4 group">
                                     <div className="flex justify-between items-start mb-2">
                                         <div>
-                                            <h4 className="font-semibold">{course.name}</h4>
+                                            <h4 className="font-semibold flex items-center gap-2">
+                                                {course.name}
+                                                {course.countsTowardsFinalGrade && (
+                                                    <span title="Counts towards B.Sc. Final Grade" className="flex items-center">
+                                                        {course.compositeExamId && <Link className="w-3 h-3 text-secondary mr-1" />}
+                                                        🎓
+                                                    </span>
+                                                )}
+                                            </h4>
                                             <span className={`inline-block mt-1 text-xs px-2 py-0.5 rounded-full ${course.status === "completed" ? "bg-success/20 text-success" :
                                                 course.status === "in-progress" ? "bg-primary/20 text-primary" :
                                                     "bg-surface-hover text-foreground-muted"

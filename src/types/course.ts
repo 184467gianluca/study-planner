@@ -24,4 +24,10 @@ export interface Course {
     offeredIn?: "SoSe" | "WiSe" | "both";
     examAttemptsMax?: number; // Usually 3
     examAttemptsUsed?: number;
+
+    // Phase 5: Official B.Sc. Grade Calculation
+    countsTowardsFinalGrade?: boolean;
+
+    // Phase 7: Multi-Part Modules & Composite Exams
+    compositeExamId?: string; // Group courses that share a single unified exam ("Doppelklausur")
 }
