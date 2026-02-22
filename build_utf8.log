@@ -1,0 +1,202 @@
+﻿
+> study-planner@0.1.0 electron:build
+> npm run build && electron-builder
+
+
+> study-planner@0.1.0 build
+> next build
+
+Ôû▓ Next.js 16.1.6 (Turbopack)
+
+  Creating an optimized production build ...
+Ô£ô Compiled successfully in 3.3s
+  Running TypeScript ...
+  Collecting page data using 23 workers ...
+  Generating static pages using 23 workers (0/7) ...
+  Generating static pages using 23 workers (1/7) 
+  Generating static pages using 23 workers (3/7) 
+  Generating static pages using 23 workers (5/7) 
+Ô£ô Generating static pages using 23 workers (7/7) in 625.6ms
+  Finalizing page optimization ...
+
+Route (app)
+Ôöî Ôùï /
+Ôö£ Ôùï /_not-found
+Ôö£ Ôùï /manager
+Ôö£ Ôùï /roadmap
+Ôöö Ôùï /timeline
+
+
+Ôùï  (Static)  prerendered as static content
+
+  ÔÇó electron-builder  version=26.8.1 os=10.0.26200
+  ÔÇó loaded configuration  file=package.json ("build" field)
+  ÔÇó description is missed in the package.json  appPackageFile=C:\Users\Gianluca\.gemini\antigravity\scratch\study-planner\package.json
+  ÔÇó author is missed in the package.json  appPackageFile=C:\Users\Gianluca\.gemini\antigravity\scratch\study-planner\package.json
+  ÔÇó executing @electron/rebuild  electronVersion=40.6.0 arch=x64 buildFromSource=false workspaceRoot=C:\Users\Gianluca\.gemini\antigravity\scratch\study-planner projectDir=./ appDir=./
+  ÔÇó installing native dependencies  arch=x64
+  ÔÇó completed installing native dependencies
+  ÔÇó packaging       platform=win32 arch=x64 electron=40.6.0 appOutDir=dist\win-unpacked
+  ÔÇó searching for node modules  pm=npm searchDir=C:\Users\Gianluca\.gemini\antigravity\scratch\study-planner
+node.exe : 
+(node:16644) [DEP0190] 
+DeprecationWarning: 
+Passing args to a 
+child process with 
+shell option true can 
+lead to security 
+vulnerabilities, as 
+the arguments are not 
+escaped, only 
+concatenated.
+In Zeile:1 Zeichen:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: ((node:16644)    
+ [D...y concatenate    
+d.:String) [], Rem    
+oteException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+(Use `node 
+--trace-deprecation 
+...` to show where the 
+warning was created)
+  ÔÇó duplicate dependency references  dependencies=["@emnapi/wasi-threads@1.1.0","@emnapi/core@1.8.1","@emnapi/runtime@1.8.1","@tybys/wasm-util@0.10.1","react-dom@19.2.3","@napi-rs/canvas@0.1.80"]
+  ÔÇó updating asar integrity executable resource  executablePath=dist\win-unpacked\Study Planner.exe
+  ÔÇó default Electron icon is used  reason=application icon is not set
+  ÔÇó downloading     url=https://github.com/electron-userland/electron-builder-binaries/releases/download/winCodeSign-2.6.0/winCodeSign-2.6.0.7z size=5.6 MB parts=1
+  ÔÇó downloaded      url=https://github.com/electron-userland/electron-builder-binaries/releases/download/winCodeSign-2.6.0/winCodeSign-2.6.0.7z duration=227ms
+  Ô¿» cannot execute  cause=exit status 2
+                    out=
+    7-Zip (a) 21.07 (x64) : Copyright (c) 1999-2021 Igor Pavlov : 2021-12-26
+    
+    Scanning the drive for archives:
+    1 file, 5635384 bytes (5504 KiB)
+    
+    Extracting archive: C:\Users\Gianluca\AppData\Local\electron-builder\Cache\winCodeSign\589214383.7z
+    --
+    Path = C:\Users\Gianluca\AppData\Local\electron-builder\Cache\winCodeSign\589214383.7z
+    Type = 7z
+    Physical Size = 5635384
+    Headers Size = 1492
+    Method = LZMA2:24m LZMA:20 BCJ2
+    Solid = +
+    Blocks = 2
+    
+    
+    Sub items Errors: 2
+    
+    Archives with Errors: 1
+    
+    Sub items Errors: 2
+    
+                    errorOut=ERROR: Cannot create symbolic link : Dem Client fehlt ein erforderliches Recht. : C:\Users\Gianluca\AppData\Local\electron-builder\Cache\winCodeSign\589214383\darwin\10.12\lib\libcrypto.dylib
+    ERROR: Cannot create symbolic link : Dem Client fehlt ein erforderliches Recht. : C:\Users\Gianluca\AppData\Local\electron-builder\Cache\winCodeSign\589214383\darwin\10.12\lib\libssl.dylib
+    
+                    command='C:\Users\Gianluca\.gemini\antigravity\scratch\study-planner\node_modules\7zip-bin\win\x64\7za.exe' x -snld -bd 'C:\Users\Gianluca\AppData\Local\electron-builder\Cache\winCodeSign\589214383.7z' '-oC:\Users\Gianluca\AppData\Local\electron-builder\Cache\winCodeSign\589214383'
+                    workingDir=C:\Users\Gianluca\AppData\Local\electron-builder\Cache\winCodeSign
+  ÔÇó downloading     url=https://github.com/electron-userland/electron-builder-binaries/releases/download/winCodeSign-2.6.0/winCodeSign-2.6.0.7z size=5.6 MB parts=1
+  ÔÇó downloaded      url=https://github.com/electron-userland/electron-builder-binaries/releases/download/winCodeSign-2.6.0/winCodeSign-2.6.0.7z duration=259ms
+  Ô¿» cannot execute  cause=exit status 2
+                    out=
+    7-Zip (a) 21.07 (x64) : Copyright (c) 1999-2021 Igor Pavlov : 2021-12-26
+    
+    Scanning the drive for archives:
+    1 file, 5635384 bytes (5504 KiB)
+    
+    Extracting archive: C:\Users\Gianluca\AppData\Local\electron-builder\Cache\winCodeSign\686126815.7z
+    --
+    Path = C:\Users\Gianluca\AppData\Local\electron-builder\Cache\winCodeSign\686126815.7z
+    Type = 7z
+    Physical Size = 5635384
+    Headers Size = 1492
+    Method = LZMA2:24m LZMA:20 BCJ2
+    Solid = +
+    Blocks = 2
+    
+    
+    Sub items Errors: 2
+    
+    Archives with Errors: 1
+    
+    Sub items Errors: 2
+    
+                    errorOut=ERROR: Cannot create symbolic link : Dem Client fehlt ein erforderliches Recht. : C:\Users\Gianluca\AppData\Local\electron-builder\Cache\winCodeSign\686126815\darwin\10.12\lib\libcrypto.dylib
+    ERROR: Cannot create symbolic link : Dem Client fehlt ein erforderliches Recht. : C:\Users\Gianluca\AppData\Local\electron-builder\Cache\winCodeSign\686126815\darwin\10.12\lib\libssl.dylib
+    
+                    command='C:\Users\Gianluca\.gemini\antigravity\scratch\study-planner\node_modules\7zip-bin\win\x64\7za.exe' x -snld -bd 'C:\Users\Gianluca\AppData\Local\electron-builder\Cache\winCodeSign\686126815.7z' '-oC:\Users\Gianluca\AppData\Local\electron-builder\Cache\winCodeSign\686126815'
+                    workingDir=C:\Users\Gianluca\AppData\Local\electron-builder\Cache\winCodeSign
+  ÔÇó downloading     url=https://github.com/electron-userland/electron-builder-binaries/releases/download/winCodeSign-2.6.0/winCodeSign-2.6.0.7z size=5.6 MB parts=1
+  ÔÇó downloaded      url=https://github.com/electron-userland/electron-builder-binaries/releases/download/winCodeSign-2.6.0/winCodeSign-2.6.0.7z duration=244ms
+  Ô¿» cannot execute  cause=exit status 2
+                    out=
+    7-Zip (a) 21.07 (x64) : Copyright (c) 1999-2021 Igor Pavlov : 2021-12-26
+    
+    Scanning the drive for archives:
+    1 file, 5635384 bytes (5504 KiB)
+    
+    Extracting archive: C:\Users\Gianluca\AppData\Local\electron-builder\Cache\winCodeSign\624684163.7z
+    --
+    Path = C:\Users\Gianluca\AppData\Local\electron-builder\Cache\winCodeSign\624684163.7z
+    Type = 7z
+    Physical Size = 5635384
+    Headers Size = 1492
+    Method = LZMA2:24m LZMA:20 BCJ2
+    Solid = +
+    Blocks = 2
+    
+    
+    Sub items Errors: 2
+    
+    Archives with Errors: 1
+    
+    Sub items Errors: 2
+    
+                    errorOut=ERROR: Cannot create symbolic link : Dem Client fehlt ein erforderliches Recht. : C:\Users\Gianluca\AppData\Local\electron-builder\Cache\winCodeSign\624684163\darwin\10.12\lib\libcrypto.dylib
+    ERROR: Cannot create symbolic link : Dem Client fehlt ein erforderliches Recht. : C:\Users\Gianluca\AppData\Local\electron-builder\Cache\winCodeSign\624684163\darwin\10.12\lib\libssl.dylib
+    
+                    command='C:\Users\Gianluca\.gemini\antigravity\scratch\study-planner\node_modules\7zip-bin\win\x64\7za.exe' x -snld -bd 'C:\Users\Gianluca\AppData\Local\electron-builder\Cache\winCodeSign\624684163.7z' '-oC:\Users\Gianluca\AppData\Local\electron-builder\Cache\winCodeSign\624684163'
+                    workingDir=C:\Users\Gianluca\AppData\Local\electron-builder\Cache\winCodeSign
+  ÔÇó downloading     url=https://github.com/electron-userland/electron-builder-binaries/releases/download/winCodeSign-2.6.0/winCodeSign-2.6.0.7z size=5.6 MB parts=1
+  ÔÇó downloaded      url=https://github.com/electron-userland/electron-builder-binaries/releases/download/winCodeSign-2.6.0/winCodeSign-2.6.0.7z duration=171ms
+  Ô¿» cannot execute  cause=exit status 2
+                    out=
+    7-Zip (a) 21.07 (x64) : Copyright (c) 1999-2021 Igor Pavlov : 2021-12-26
+    
+    Scanning the drive for archives:
+    1 file, 5635384 bytes (5504 KiB)
+    
+    Extracting archive: C:\Users\Gianluca\AppData\Local\electron-builder\Cache\winCodeSign\254766975.7z
+    --
+    Path = C:\Users\Gianluca\AppData\Local\electron-builder\Cache\winCodeSign\254766975.7z
+    Type = 7z
+    Physical Size = 5635384
+    Headers Size = 1492
+    Method = LZMA2:24m LZMA:20 BCJ2
+    Solid = +
+    Blocks = 2
+    
+    
+    Sub items Errors: 2
+    
+    Archives with Errors: 1
+    
+    Sub items Errors: 2
+    
+                    errorOut=ERROR: Cannot create symbolic link : Dem Client fehlt ein erforderliches Recht. : C:\Users\Gianluca\AppData\Local\electron-builder\Cache\winCodeSign\254766975\darwin\10.12\lib\libcrypto.dylib
+    ERROR: Cannot create symbolic link : Dem Client fehlt ein erforderliches Recht. : C:\Users\Gianluca\AppData\Local\electron-builder\Cache\winCodeSign\254766975\darwin\10.12\lib\libssl.dylib
+    
+                    command='C:\Users\Gianluca\.gemini\antigravity\scratch\study-planner\node_modules\7zip-bin\win\x64\7za.exe' x -snld -bd 'C:\Users\Gianluca\AppData\Local\electron-builder\Cache\winCodeSign\254766975.7z' '-oC:\Users\Gianluca\AppData\Local\electron-builder\Cache\winCodeSign\254766975'
+                    workingDir=C:\Users\Gianluca\AppData\Local\electron-builder\Cache\winCodeSign
