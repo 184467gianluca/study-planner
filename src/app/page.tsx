@@ -91,6 +91,16 @@ export default function Dashboard() {
             <span>{totalCompletedCP} CP Completed</span>
             <span>Goal: {bscGoalCP} CP</span>
           </div>
+          <div className="flex items-center gap-4 mt-3 text-[10px] text-foreground-muted">
+            <div className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded-full bg-primary/80"></span>
+              <span>Passed & Completed</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded-full bg-secondary/50"></span>
+              <span>Actively In Progress</span>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
