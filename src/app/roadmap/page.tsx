@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { useCourses } from "@/context/CourseContext";
 import { Card, CardContent } from "@/components/ui/Card";
-import { CheckCircle2, CircleDashed, Clock, GraduationCap, Star, FileText, MessageCircle, Calendar } from "lucide-react";
+import { CheckCircle2, CircleDashed, Clock, GraduationCap, Star, FileText, MessageCircle, Calendar, ArrowRightLeft } from "lucide-react";
 
 export default function RoadmapView() {
     const { courses, startSeason } = useCourses();
+    const [viewMode, setViewMode] = useState<"custom" | "official">("custom");
 
     const getSeasonForSemester = (sem: number) => {
         const isStartWiSe = startSeason === "WiSe";
@@ -24,9 +26,9 @@ export default function RoadmapView() {
         }
     };
 
-    // Phase 9: Group courses strictly by semester for the new Kanban layout
+    // Phase 11: Dynamic Grouping based on View Mode
     const coursesBySemester = courses.reduce((acc, course) => {
-        const sem = course.semester;
+        const sem = viewMode === "official" ? (course.recommendedSemester || course.semester) : course.semester;
         if (!acc[sem]) acc[sem] = [];
         acc[sem].push(course);
         return acc;
@@ -39,13 +41,40 @@ export default function RoadmapView() {
 
     return (
         <div className="space-y-6 h-[calc(100vh-8rem)] flex flex-col">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight text-white drop-shadow-[0_0_8px_rgba(0,229,255,0.2)]">
-                    Roadmap
-                </h1>
-                <p className="text-foreground-muted mt-2">
-                    Visual layout of your entire B.Sc. plan, sorted by semester.
-                </p>
+            <div className="flex justify-between items-end">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight text-white drop-shadow-[0_0_8px_rgba(0,229,255,0.2)]">
+                        Roadmap
+                    </h1>
+                    <p className="text-foreground-muted mt-2">
+                        {viewMode === "custom"
+                            ? "Visual layout of your entire actual B.Sc. plan, sorted by your planned semesters."
+                            : "The strict academic blueprint, sorted by the recommended semester (Regelstudienzeit)."}
+                    </p>
+                </div>
+
+                {/* Phase 11 Toggle */}
+                <div className="flex items-center bg-surface border border-border rounded-lg p-1 shadow-sm">
+                    <button
+                        onClick={() => setViewMode("custom")}
+                        className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${viewMode === "custom"
+                            ? "bg-primary text-background shadow-md"
+                            : "text-foreground-muted hover:text-foreground"
+                            }`}
+                    >
+                        My Custom Plan
+                    </button>
+                    <button
+                        onClick={() => setViewMode("official")}
+                        className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${viewMode === "official"
+                            ? "bg-surface-hover text-foreground shadow-md border border-border"
+                            : "text-foreground-muted hover:text-foreground"
+                            }`}
+                    >
+                        <ArrowRightLeft className="w-4 h-4 opacity-70" />
+                        Official Blueprint
+                    </button>
+                </div>
             </div>
 
             {activeSemesters.length === 0 ? (
@@ -139,6 +168,21 @@ export default function RoadmapView() {
                                                                     </span>
                                                                 )}
                                                             </div>
+
+                                                            {/* Phase 11 Deviation indicator */}
+                                                            {course.recommendedSemester && course.semester !== course.recommendedSemester && (
+                                                                <div className="mt-2 text-[10px] font-medium">
+                                                                    {viewMode === "custom" ? (
+                                                                        <span className="inline-block px-1.5 py-0.5 rounded border border-orange-500/30 text-orange-400 bg-orange-500/10" title="Moved from the official curriculum plan">
+                                                                            PO: Sem {course.recommendedSemester}
+                                                                        </span>
+                                                                    ) : (
+                                                                        <span className="inline-block px-1.5 py-0.5 rounded border border-border text-foreground-muted bg-surface" title="Currently planned in a different semester">
+                                                                            Planned: Sem {course.semester}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            )}
 
                                                             <div className="flex items-center justify-between mt-3 text-[10px] pt-3 border-t border-border/50">
                                                                 <span className="opacity-70 capitalize bg-background/50 px-2 py-1 rounded">

@@ -5,6 +5,7 @@ export interface Course {
     name: string;
     credits: number;
     semester: number;
+    recommendedSemester?: number; // Phase 11: The official PO semester for comparison
     status?: CourseStatus; // Dynamically computed based on current semester
     parentModuleId?: string; // ID of the parent module if this is an elective choice
     category?: string; // e.g., 'meteorology', 'physics', 'math', 'elective'
