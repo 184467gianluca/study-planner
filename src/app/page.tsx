@@ -1,6 +1,7 @@
 "use client";
 
 import { useCourses } from "@/context/CourseContext";
+import { BackupManager } from "@/components/BackupManager";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { BookOpen, GraduationCap, TrendingUp, Clock, AlertCircle, FileText, Info } from "lucide-react";
 
@@ -284,49 +285,53 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Courses</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {courses.length === 0 ? (
-            <p className="text-sm text-foreground-muted text-center py-6">
-              No courses added yet. Go to the Course Manager to add some.
-            </p>
-          ) : (
-            <div className="space-y-4">
-              {courses.slice(0, 5).map((course) => (
-                <div key={course.id} className="flex justify-between items-center border-b border-border pb-4 last:border-0 last:pb-0">
-                  <div>
-                    <p className="font-medium flex items-center gap-2">
-                      {course.name}
-                      {course.grade && course.status === "completed" && (
-                        <span className="text-[10px] font-bold bg-secondary/20 text-secondary px-1.5 py-0.5 rounded-sm">
-                          {course.grade.toFixed(1)}
-                        </span>
-                      )}
-                    </p>
-                    <p className="text-xs text-foreground-muted flex gap-3 mt-1">
-                      <span>Sem {course.semester}</span>
-                      {course.sws !== undefined && <span>{course.sws} SWS</span>}
-                      {course.category && <span className="capitalize opacity-60">• {course.category}</span>}
-                    </p>
+      <div className="grid gap-6 md:grid-cols-2 items-start mt-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Courses</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {courses.length === 0 ? (
+              <p className="text-sm text-foreground-muted text-center py-6">
+                No courses added yet. Go to the Course Manager to add some.
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {courses.slice(0, 5).map((course) => (
+                  <div key={course.id} className="flex justify-between items-center border-b border-border pb-4 last:border-0 last:pb-0">
+                    <div>
+                      <p className="font-medium flex items-center gap-2">
+                        {course.name}
+                        {course.grade && course.status === "completed" && (
+                          <span className="text-[10px] font-bold bg-secondary/20 text-secondary px-1.5 py-0.5 rounded-sm">
+                            {course.grade.toFixed(1)}
+                          </span>
+                        )}
+                      </p>
+                      <p className="text-xs text-foreground-muted flex gap-3 mt-1">
+                        <span>Sem {course.semester}</span>
+                        {course.sws !== undefined && <span>{course.sws} SWS</span>}
+                        {course.category && <span className="capitalize opacity-60">• {course.category}</span>}
+                      </p>
+                    </div>
+                    <div className="flex flex-col items-end gap-1">
+                      <span className="text-sm font-semibold">{course.credits} CP</span>
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full ${course.status === "completed" ? "bg-success/20 text-success" :
+                        course.status === "in-progress" ? "bg-primary/20 text-primary" :
+                          "bg-surface-hover text-foreground-muted"
+                        }`}>
+                        {course.status}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <span className="text-sm font-semibold">{course.credits} CP</span>
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full ${course.status === "completed" ? "bg-success/20 text-success" :
-                      course.status === "in-progress" ? "bg-primary/20 text-primary" :
-                        "bg-surface-hover text-foreground-muted"
-                      }`}>
-                      {course.status}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <BackupManager />
+      </div>
     </div>
   );
 }

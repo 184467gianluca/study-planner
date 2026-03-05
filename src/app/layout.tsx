@@ -16,7 +16,12 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Study Planner",
-  description: "Plan your semester",
+  description: "Interactive B.Sc. Study Planner",
+  manifest: "/manifest.json",
+};
+
+export const viewport = {
+  themeColor: "#00e5ff",
 };
 
 export default function RootLayout({
