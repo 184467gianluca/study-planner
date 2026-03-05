@@ -4,12 +4,13 @@ import { useCourses } from "@/context/CourseContext";
 import { BackupManager } from "@/components/BackupManager";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { BookOpen, GraduationCap, TrendingUp, Clock, AlertCircle, FileText, Info } from "lucide-react";
+import { Course } from "@/types/course";
 
 export default function Dashboard() {
   const { courses, currentSemester } = useCourses();
 
   // Helper: check if a course is passed
-  const isPassed = (c: any) => !c.isGraded || (c.isGraded && c.grade && c.grade <= 4.0);
+  const isPassed = (c: Course) => !c.isGraded || (c.isGraded && c.grade && c.grade <= 4.0);
 
 
 

@@ -43,7 +43,7 @@ export function BackupManager() {
                 } else {
                     alert("Invalid backup file format. Missing courses array.");
                 }
-            } catch (err) {
+            } catch {
                 alert("Error importing backup. The file may be corrupted.");
             }
         };

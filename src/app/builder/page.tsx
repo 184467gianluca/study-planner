@@ -5,7 +5,6 @@ import { useState, useMemo, useEffect } from "react";
 import {
     DndContext,
     DragOverlay,
-    closestCorners,
     KeyboardSensor,
     PointerSensor,
     useSensor,
@@ -25,7 +24,7 @@ export default function StudyBuilderView() {
     const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => {
-        setIsMounted(true);
+        queueMicrotask(() => setIsMounted(true));
     }, []);
 
     // Sensors setup for DND Kit
@@ -67,7 +66,6 @@ export default function StudyBuilderView() {
         if (!over) return;
 
         const activeId = active.id as string;
-        const overId = over.id as string;
 
         const activeCourse = courses.find(c => c.id === activeId);
         if (!activeCourse) return;

@@ -351,7 +351,7 @@ export default function CourseManager() {
                                     <select
                                         id="offeredIn"
                                         value={formData.offeredIn}
-                                        onChange={(e) => setFormData({ ...formData, offeredIn: e.target.value as any })}
+                                        onChange={(e) => setFormData({ ...formData, offeredIn: e.target.value as "WiSe" | "SoSe" | "both" })}
                                         className="mt-1 flex h-10 w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors"
                                     >
                                         <option value="both">Both (WiSe & SoSe)</option>
@@ -437,7 +437,7 @@ export default function CourseManager() {
                                             <select
                                                 id="admissionStatus"
                                                 value={formData.admissionStatus}
-                                                onChange={(e) => setFormData({ ...formData, admissionStatus: e.target.value as any })}
+                                                onChange={(e) => setFormData({ ...formData, admissionStatus: e.target.value as "not-required" | "pending" | "granted" })}
                                                 className="mt-1 flex h-10 w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors"
                                             >
                                                 <option value="not-required">Not Required</option>
@@ -456,7 +456,7 @@ export default function CourseManager() {
                                     <select
                                         id="examType"
                                         value={formData.examType}
-                                        onChange={(e) => setFormData({ ...formData, examType: e.target.value as any })}
+                                        onChange={(e) => setFormData({ ...formData, examType: e.target.value as "written" | "oral" | "none" })}
                                         className="mt-1 flex h-10 w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors mb-4"
                                     >
                                         <option value="none">None (Portfolioprüfung/Presentation)</option>
