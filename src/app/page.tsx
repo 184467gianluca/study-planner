@@ -213,49 +213,82 @@ export default function Dashboard() {
       {/* Progress Bar Section */}
       <Card className="bg-surface/60 border-primary/20 relative z-10 hover:z-50 transition-all">
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg font-bold flex justify-between items-center relative group cursor-help">
+          <CardTitle className="text-lg font-bold flex justify-between items-center">
             <span className="flex items-center gap-2">
               B.Sc. Progress{" "}
               <Info className="h-4 w-4 text-foreground-muted opacity-50" />
             </span>
             <span className="text-primary">{progressPercent.toFixed(1)}%</span>
-
-            <HoverCard
-              title="Completed Modules"
-              coursesList={courses.filter(
-                (c) =>
-                  c.status === "completed" && isPassed(c) && !c.isContainer,
-              )}
-            />
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="w-full h-4 bg-surface-hover rounded-full overflow-hidden flex shadow-inner">
-            <div
-              className="h-full bg-primary/80 transition-all duration-1000 ease-out"
-              style={{ width: `${progressPercent}%` }}
-              title={`Completed: ${totalCompletedCP} CP`}
-            />
-            <div
-              className="h-full bg-secondary/50 transition-all duration-1000 ease-out"
-              style={{
-                width: `${Math.min((totalInProgressCP / bscGoalCP) * 100, 100 - progressPercent)}%`,
-              }}
-              title={`In Progress: ${totalInProgressCP} CP`}
-            />
+          <div className="relative">
+            <div className="w-full h-4 bg-surface-hover rounded-full overflow-hidden flex shadow-inner">
+              <div
+                className="h-full bg-primary/80 transition-all duration-1000 ease-out"
+                style={{ width: `${progressPercent}%` }}
+              />
+              <div
+                className="h-full bg-secondary/50 transition-all duration-1000 ease-out"
+                style={{
+                  width: `${Math.min((totalInProgressCP / bscGoalCP) * 100, 100 - progressPercent)}%`,
+                }}
+              />
+            </div>
+            <div className="absolute inset-0 flex">
+              <div
+                className="h-full relative group cursor-help"
+                style={{ width: `${progressPercent}%` }}
+              >
+                <HoverCard
+                  title="Completed Modules"
+                  coursesList={courses.filter(
+                    (c) =>
+                      c.status === "completed" && isPassed(c) && !c.isContainer,
+                  )}
+                />
+              </div>
+              <div
+                className="h-full relative group cursor-help"
+                style={{
+                  width: `${Math.min((totalInProgressCP / bscGoalCP) * 100, 100 - progressPercent)}%`,
+                }}
+              >
+                <HoverCard
+                  title="Actively In Progress"
+                  coursesList={courses.filter(
+                    (c) => c.status === "in-progress" && !c.isContainer,
+                  )}
+                />
+              </div>
+            </div>
           </div>
+
           <div className="flex justify-between text-xs text-foreground-muted mt-2">
             <span>{totalCompletedCP} CP Completed</span>
             <span>Goal: {bscGoalCP} CP</span>
           </div>
           <div className="flex items-center gap-4 mt-3 text-[10px] text-foreground-muted">
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 relative group cursor-help">
               <span className="w-3 h-3 rounded-full bg-primary/80"></span>
               <span>Passed & Completed</span>
+              <HoverCard
+                title="Completed Modules"
+                coursesList={courses.filter(
+                  (c) =>
+                    c.status === "completed" && isPassed(c) && !c.isContainer,
+                )}
+              />
             </div>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 relative group cursor-help">
               <span className="w-3 h-3 rounded-full bg-secondary/50"></span>
               <span>Actively In Progress</span>
+              <HoverCard
+                title="Actively In Progress"
+                coursesList={courses.filter(
+                  (c) => c.status === "in-progress" && !c.isContainer,
+                )}
+              />
             </div>
           </div>
         </CardContent>
@@ -274,10 +307,7 @@ export default function Dashboard() {
                 (c) => c.parentModuleId === container.id,
               );
               return (
-                <div
-                  key={container.id}
-                  className="space-y-1 relative group cursor-help"
-                >
+                <div key={container.id} className="space-y-1">
                   <div className="flex justify-between text-sm">
                     <span className="font-semibold text-foreground flex items-center gap-1.5">
                       {container.name}{" "}
@@ -287,28 +317,30 @@ export default function Dashboard() {
                       {container.completedCP} / {container.credits} CP
                     </span>
                   </div>
-                  <div className="w-full h-2 bg-surface-hover rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-primary/80 transition-all"
-                      style={{
-                        width: `${Math.min((container.completedCP / (container.credits || 1)) * 100, 100)}%`,
-                      }}
+                  <div className="relative group cursor-help">
+                    <div className="w-full h-2 bg-surface-hover rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-primary/80 transition-all"
+                        style={{
+                          width: `${Math.min((container.completedCP / (container.credits || 1)) * 100, 100)}%`,
+                        }}
+                      />
+                    </div>
+
+                    <HoverCard
+                      title={`Included in ${container.name}`}
+                      coursesList={children}
+                      renderValue={(c) =>
+                        c.status === "completed" ? (
+                          <span className="text-success">
+                            {c.credits} CP (Done)
+                          </span>
+                        ) : (
+                          <span className="opacity-50">{c.credits} CP</span>
+                        )
+                      }
                     />
                   </div>
-
-                  <HoverCard
-                    title={`Included in ${container.name}`}
-                    coursesList={children}
-                    renderValue={(c) =>
-                      c.status === "completed" ? (
-                        <span className="text-success">
-                          {c.credits} CP (Done)
-                        </span>
-                      ) : (
-                        <span className="opacity-50">{c.credits} CP</span>
-                      )
-                    }
-                  />
                 </div>
               );
             })}
