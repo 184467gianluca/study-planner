@@ -37,30 +37,35 @@ export default function Dashboard() {
           : "left-0";
     return (
       <div
-        className={`absolute top-full ${alignClass} mt-2 w-72 bg-surface-hover/95 backdrop-blur-md border border-border shadow-2xl rounded-lg p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 pointer-events-none`}
+        className={`absolute top-full ${alignClass} pt-2 w-72 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all group-hover:pointer-events-auto`}
       >
-        <p className="text-xs font-semibold text-foreground mb-2 pb-2 border-b border-border/50">
-          {title} ({coursesList.length})
-        </p>
-        {coursesList.length === 0 ? (
-          <p className="text-[11px] text-foreground-muted italic">None</p>
-        ) : (
-          <div className="space-y-1.5 max-h-[250px] overflow-y-auto pr-1 custom-scrollbar text-[11px] text-foreground-muted">
-            {coursesList.map((c) => (
-              <div
-                key={c.id}
-                className="flex justify-between items-start gap-2 border-b border-border/30 last:border-0 pb-1 last:pb-0"
-              >
-                <span className="font-medium text-foreground truncate pr-2">
-                  {c.name}
-                </span>
-                <span className="shrink-0">
-                  {renderValue ? renderValue(c) : `${c.credits} CP`}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
+        <div className="bg-surface-hover/95 backdrop-blur-md border border-border shadow-2xl rounded-lg p-3">
+          <p className="text-xs font-semibold text-foreground mb-2 pb-2 border-b border-border/50">
+            {title} ({coursesList.length})
+          </p>
+          {coursesList.length === 0 ? (
+            <p className="text-[11px] text-foreground-muted italic">None</p>
+          ) : (
+            <div className="space-y-1.5 max-h-[250px] overflow-y-auto pr-1 custom-scrollbar text-[11px] text-foreground-muted pointer-events-auto">
+              {coursesList.map((c) => (
+                <div
+                  key={c.id}
+                  className="flex justify-between items-start gap-2 border-b border-border/30 last:border-0 pb-1 last:pb-0"
+                >
+                  <span
+                    className="font-medium text-foreground truncate pr-2"
+                    title={c.name}
+                  >
+                    {c.name}
+                  </span>
+                  <span className="shrink-0">
+                    {renderValue ? renderValue(c) : `${c.credits} CP`}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     );
   };
@@ -206,7 +211,7 @@ export default function Dashboard() {
       </div>
 
       {/* Progress Bar Section */}
-      <Card className="bg-surface/60 border-primary/20">
+      <Card className="bg-surface/60 border-primary/20 relative z-10 hover:z-50 transition-all">
         <CardHeader className="pb-2">
           <CardTitle className="text-lg font-bold flex justify-between items-center relative group cursor-help">
             <span className="flex items-center gap-2">
@@ -257,7 +262,7 @@ export default function Dashboard() {
       </Card>
 
       {containerModules.length > 0 && (
-        <Card className="bg-surface/60 border-primary/20">
+        <Card className="bg-surface/60 border-primary/20 relative z-10 hover:z-50 transition-all">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg font-bold">
               Module Collections
@@ -312,7 +317,7 @@ export default function Dashboard() {
       )}
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="bg-surface/60 border-primary/20 hover:border-primary/50 transition-colors relative z-10">
+        <Card className="bg-surface/60 border-primary/20 hover:border-primary/50 transition-colors relative z-10 hover:z-50">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-foreground-muted flex items-center gap-2 relative group">
               Current Grade
@@ -363,7 +368,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="bg-surface/60 border-secondary/20 hover:border-secondary/50 transition-colors">
+        <Card className="bg-surface/60 border-secondary/20 hover:border-secondary/50 transition-colors relative z-10 hover:z-50">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-foreground-muted flex items-center gap-2 relative group cursor-help w-full justify-between">
               <span className="flex items-center gap-1.5">
@@ -397,7 +402,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="bg-surface/60 border-success/20 hover:border-success/50 transition-colors">
+        <Card className="bg-surface/60 border-success/20 hover:border-success/50 transition-colors relative z-10 hover:z-50">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-foreground-muted flex items-center gap-2 relative group cursor-help w-full justify-between">
               <span className="flex items-center gap-1.5">
@@ -422,7 +427,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="bg-surface/60 border-orange-500/20 hover:border-orange-500/50 transition-colors">
+        <Card className="bg-surface/60 border-orange-500/20 hover:border-orange-500/50 transition-colors relative z-10 hover:z-50">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-foreground-muted flex items-center gap-2 relative group cursor-help w-full justify-between">
               <span className="flex items-center gap-1.5">
@@ -455,7 +460,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="bg-surface/60 border-purple-500/20 hover:border-purple-500/50 transition-colors">
+        <Card className="bg-surface/60 border-purple-500/20 hover:border-purple-500/50 transition-colors relative z-10 hover:z-50">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-foreground-muted flex items-center gap-2 relative group cursor-help w-full justify-between">
               <span className="flex items-center gap-1.5">
@@ -485,7 +490,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="bg-surface/60 border-danger/20 hover:border-danger/50 transition-colors">
+        <Card className="bg-surface/60 border-danger/20 hover:border-danger/50 transition-colors relative z-10 hover:z-50">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-foreground-muted flex items-center gap-2 relative group cursor-help w-full justify-between">
               <span className="flex items-center gap-1.5">
@@ -525,7 +530,7 @@ export default function Dashboard() {
         </Card>
 
         {/* Phase 4: Critical Exams Card */}
-        <Card className="bg-surface/60 border-red-500/20 hover:border-red-500/50 transition-colors">
+        <Card className="bg-surface/60 border-red-500/20 hover:border-red-500/50 transition-colors relative z-10 hover:z-50">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-foreground-muted flex items-center gap-2 relative group cursor-help w-full justify-between">
               <span className="flex items-center gap-1.5">
