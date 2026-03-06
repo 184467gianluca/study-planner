@@ -88,7 +88,7 @@ export default function Dashboard() {
   const bscGoalCP = 180;
   const progressPercent = Math.min((totalCompletedCP / bscGoalCP) * 100, 100);
 
-  // Phase 5 & 7: Grade calculation (Aktuelle Note) - Weighted average: Sum(Grade * CP) / Sum(CP)
+  // Phase 5 & 7 & 18: Grade calculation (Aktuelle Note) - Weighted average: Sum(Grade * CP) / Sum(CP)
   // Strict Rules: Only courses with `countsTowardsFinalGrade`.
   // Composite Exam Rule: Courses with the same `compositeExamId` act as a single mathematical block.
   const gradedCourses = courses.filter(
@@ -100,11 +100,18 @@ export default function Dashboard() {
       !c.isContainer,
   );
   let averageGrade = 0;
+  let totalGradedCP = 0;
+  let weightedSum = 0;
+
+  // Array to hold the math steps for the tooltip
+  const gradeBreakdown: {
+    name: string;
+    cp: number;
+    grade: number;
+    weight: number;
+  }[] = [];
 
   if (gradedCourses.length > 0) {
-    let totalGradedCP = 0;
-    let weightedSum = 0;
-
     // Group courses by their composite ID, or treat standalone courses uniquely
     const processedComposites = new Set<string>();
 
@@ -127,11 +134,25 @@ export default function Dashboard() {
           // Add the grouped CP and weight it ONCE by the shared grade
           totalGradedCP += compositeCP;
           weightedSum += (course.grade || 0) * compositeCP;
+
+          gradeBreakdown.push({
+            name: `Composite: ${compositeParts.map((c) => c.name).join(" + ")}`,
+            cp: compositeCP,
+            grade: course.grade || 0,
+            weight: (course.grade || 0) * compositeCP,
+          });
         }
       } else {
         // Standard standalone course
         totalGradedCP += course.credits || 0;
         weightedSum += (course.grade || 0) * (course.credits || 0);
+
+        gradeBreakdown.push({
+          name: course.name,
+          cp: course.credits || 0,
+          grade: course.grade || 0,
+          weight: (course.grade || 0) * (course.credits || 0),
+        });
       }
     });
 
@@ -153,13 +174,25 @@ export default function Dashboard() {
     0,
   );
 
-  // Phase 3 Metrics
-  const writtenExams = currentInProgress.filter(
-    (c) => c.examType === "written",
-  ).length;
-  const oralExams = currentInProgress.filter(
-    (c) => c.examType === "oral",
-  ).length;
+  // Phase 3 & 18 Metrics: Deduplicate Exams
+  const processedExamComposites = new Set<string>();
+  let writtenExams = 0;
+  let oralExams = 0;
+
+  currentInProgress
+    .filter((c) => c.examType !== "none")
+    .forEach((course) => {
+      if (course.compositeExamId) {
+        if (!processedExamComposites.has(course.compositeExamId)) {
+          processedExamComposites.add(course.compositeExamId);
+          if (course.examType === "written") writtenExams++;
+          if (course.examType === "oral") oralExams++;
+        }
+      } else {
+        if (course.examType === "written") writtenExams++;
+        if (course.examType === "oral") oralExams++;
+      }
+    });
   const pendingAdmissions = currentInProgress.filter(
     (c) => c.hasExercise && c.admissionStatus === "pending",
   ).length;
@@ -354,34 +387,50 @@ export default function Dashboard() {
             <CardTitle className="text-sm font-medium text-foreground-muted flex items-center gap-2 relative group">
               Current Grade
               <Info className="h-4 w-4 text-secondary/50 hover:text-secondary transition-colors cursor-help" />
-              {/* Hover Tooltip Dropdown */}
-              <div className="absolute top-full left-0 mt-2 w-72 bg-surface-hover/95 backdrop-blur-md border border-border shadow-lg rounded-lg p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 pointer-events-none">
-                <p className="text-xs font-semibold text-foreground mb-2 pb-2 border-b border-border/50">
-                  Modules directly affecting the B.Sc. Grade:
-                </p>
-                <div className="space-y-1.5 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar text-[11px] text-foreground-muted">
-                  <p className="font-medium text-foreground">
-                    Meteorology (1-fach B.Sc.):
+              <div className="absolute top-full left-0 pt-2 w-80 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all group-hover:pointer-events-auto">
+                <div className="bg-surface-hover/95 backdrop-blur-md border border-border shadow-2xl rounded-lg p-3">
+                  <p className="text-xs font-semibold text-foreground mb-2 pb-2 border-b border-border/50">
+                    Grade Breakdown (Sum of (Grade * CP) / Total CP)
                   </p>
-                  <ul className="list-disc pl-4 space-y-1 mb-2">
-                    <li>Allgemeine Meteorologie (EMETA - 10 CP)</li>
-                    <li>IT & Atmosphärendynamik 1+2 (EMETB - 12 CP)</li>
-                    <li>Physik & Chemie der Atmosphäre 1 (6 CP)</li>
-                    <li>Atmosphärendynamik 3 (6 CP)</li>
-                    <li>Numerische Wettervorhersage (5 CP)</li>
-                    <li>Bachelorarbeit (12 CP)</li>
-                  </ul>
-                  <p className="font-medium text-foreground">Physics & Math:</p>
-                  <ul className="list-disc pl-4 space-y-1">
-                    <li>Mathematik für Physik 1 (8 CP)</li>
-                    <li>Mechanik & Thermodynamik (10 CP)</li>
-                    <li>Mathematik für Meteorologie 2 (8 CP)</li>
-                    <li>Elektrodynamik (8 CP)</li>
-                    <li>Theoretische Physik 2 (8 CP)</li>
-                    <li>Mathematik für Meteorologie 3 (8 CP)</li>
-                    <li>Optik (4 CP)</li>
-                    <li>Atome und Quanten (4 CP)</li>
-                  </ul>
+
+                  {gradeBreakdown.length === 0 ? (
+                    <p className="text-[11px] text-foreground-muted italic">
+                      No graded modules yet.
+                    </p>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="space-y-1.5 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar text-[11px] text-foreground-muted pointer-events-auto">
+                        {gradeBreakdown.map((item, idx) => (
+                          <div
+                            key={idx}
+                            className="flex justify-between items-start gap-2 border-b border-border/30 last:border-0 pb-1.5 last:pb-0"
+                          >
+                            <span
+                              className="font-medium text-foreground truncate pr-2 w-2/3"
+                              title={item.name}
+                            >
+                              {item.name}
+                            </span>
+                            <span className="shrink-0 font-mono text-secondary">
+                              ({item.grade.toFixed(1)} * {item.cp}) ={" "}
+                              <span className="text-foreground">
+                                {item.weight.toFixed(1)}
+                              </span>
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="pt-2 border-t border-border/50 text-xs font-mono text-foreground bg-surface/50 p-2 rounded flex flex-col gap-1 items-center">
+                        <div>Sum = {weightedSum.toFixed(1)}</div>
+                        <div className="w-full border-b border-dashed border-foreground-muted/50"></div>
+                        <div>Total CP = {totalGradedCP}</div>
+                        <div className="mt-1 font-sans font-bold text-primary">
+                          = {averageGrade ? averageGrade.toFixed(1) : "—"}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </CardTitle>
