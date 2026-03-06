@@ -37,8 +37,8 @@ export default function StudyBuilderView() {
         useSensor(KeyboardSensor)
     );
 
-    // Memoize top level courses to prevent unnecessary re-renders
-    const topLevelCourses = useMemo(() => courses.filter(c => !c.parentModuleId), [courses]);
+    // Memoize renderable courses (exclude containers themselves, include their children)
+    const topLevelCourses = useMemo(() => courses.filter(c => !c.isContainer && (!c.parentModuleId || courses.find(p => p.id === c.parentModuleId)?.isContainer)), [courses]);
 
     // Dynamically calculate how many semester columns we need (at least 6)
     const maxSem = useMemo(() => Math.max(6, ...courses.map(c => c.semester)), [courses]);

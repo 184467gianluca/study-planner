@@ -7,6 +7,8 @@ export interface Course {
     semester: number;
     recommendedSemester?: number; // Phase 11: The official PO semester for comparison
     status?: CourseStatus; // Dynamically computed based on current semester
+    isContainer?: boolean; // True if this is a multi-semester shell module (e.g. METWAS)
+    containerSemesters?: number[]; // The specific semesters where this container span should render
     parentModuleId?: string; // ID of the parent module if this is an elective choice
     category?: string; // e.g., 'meteorology', 'physics', 'math', 'elective'
     sws?: number; // Semesterwochenstunden

@@ -16,13 +16,13 @@ export default function Dashboard() {
 
   // Progress calculations (Only count CP if passed)
   const totalCompletedCP = courses
-    .filter(c => c.status === "completed" && isPassed(c))
+    .filter(c => c.status === "completed" && isPassed(c) && !c.isContainer)
     .reduce((acc, course) => acc + (course.credits || 0), 0);
   const totalInProgressCP = courses
-    .filter(c => c.status === "in-progress")
+    .filter(c => c.status === "in-progress" && !c.isContainer)
     .reduce((acc, course) => acc + (course.credits || 0), 0);
   const totalPlannedCP = courses
-    .filter(c => c.status === "planned")
+    .filter(c => c.status === "planned" && !c.isContainer)
     .reduce((acc, course) => acc + (course.credits || 0), 0);
 
   const bscGoalCP = 180;
@@ -31,7 +31,7 @@ export default function Dashboard() {
   // Phase 5 & 7: Grade calculation (Aktuelle Note) - Weighted average: Sum(Grade * CP) / Sum(CP)
   // Strict Rules: Only courses with `countsTowardsFinalGrade`.
   // Composite Exam Rule: Courses with the same `compositeExamId` act as a single mathematical block.
-  const gradedCourses = courses.filter(c => c.status === "completed" && c.isGraded !== false && c.grade && c.countsTowardsFinalGrade);
+  const gradedCourses = courses.filter(c => c.status === "completed" && c.isGraded !== false && c.grade && c.countsTowardsFinalGrade && !c.isContainer);
   let averageGrade = 0;
 
   if (gradedCourses.length > 0) {
@@ -70,7 +70,7 @@ export default function Dashboard() {
   }
 
   // SWS calculation for current semester
-  const currentInProgress = courses.filter(c => c.semester === currentSemester && c.status === "in-progress");
+  const currentInProgress = courses.filter(c => c.semester === currentSemester && c.status === "in-progress" && !c.isContainer);
   const currentSWS = currentInProgress.reduce((acc, c) => acc + (c.sws || 0) + (c.exerciseSws || 0), 0);
 
   // Phase 3 Metrics
@@ -89,7 +89,20 @@ export default function Dashboard() {
   ).length;
 
   const activeCourses = currentInProgress.length;
-  const completedCourses = courses.filter((c) => c.status === "completed").length;
+  const completedCourses = courses.filter((c) => c.status === "completed" && !c.isContainer).length;
+
+  // Module Collections (Container Modules)
+  const containerModules = courses.filter(c => c.isContainer);
+  const containerProgress = containerModules.map(container => {
+    const children = courses.filter(c => c.parentModuleId === container.id);
+    const completedCP = children
+      .filter(c => c.status === "completed" && isPassed(c))
+      .reduce((acc, c) => acc + (c.credits || 0), 0);
+    return {
+      ...container,
+      completedCP,
+    };
+  });
 
   return (
     <div className="space-y-6">
@@ -139,6 +152,30 @@ export default function Dashboard() {
           </div>
         </CardContent>
       </Card>
+
+      {containerModules.length > 0 && (
+        <Card className="bg-surface/60 border-primary/20">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg font-bold">Module Collections</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {containerProgress.map(container => (
+              <div key={container.id} className="space-y-1">
+                <div className="flex justify-between text-sm">
+                  <span className="font-semibold text-foreground">{container.name}</span>
+                  <span className="text-foreground-muted">{container.completedCP} / {container.credits} CP</span>
+                </div>
+                <div className="w-full h-2 bg-surface-hover rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-primary/80 transition-all"
+                    style={{ width: `${Math.min((container.completedCP / (container.credits || 1)) * 100, 100)}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Card className="bg-surface/60 border-primary/20 hover:border-primary/50 transition-colors relative z-10">
