@@ -303,21 +303,64 @@ export default function RoadmapView() {
                               </div>
 
                               {childCourses.length > 0 && (
-                                <div className="mt-3 pt-3 border-t border-black/10 space-y-1.5">
+                                <div className="mt-3 pt-3 border-t border-black/10 space-y-2">
                                   {childCourses.map((child) => (
                                     <div
                                       key={child.id}
-                                      className={`px-2 py-1.5 rounded border text-[11px] flex justify-between items-center bg-background/80 ${getCategoryStyles(child.category)}`}
+                                      className={`p-2 rounded border border-border/50 text-xs bg-background/80 ${getCategoryStyles(child.category)}`}
                                     >
-                                      <span
-                                        className="font-medium truncate mr-2"
-                                        title={child.name}
-                                      >
-                                        {child.name}
-                                      </span>
-                                      <span className="whitespace-nowrap opacity-80">
-                                        {child.credits} CP
-                                      </span>
+                                      <div className="flex justify-between items-start mb-1">
+                                        <span
+                                          className="font-semibold leading-tight line-clamp-2 pr-2"
+                                          title={child.name}
+                                        >
+                                          {child.name}
+                                        </span>
+                                        <div className="flex items-center gap-1.5 shrink-0">
+                                          <span className="px-1 py-0.5 rounded bg-black/20 text-[10px] font-medium">
+                                            {child.credits} CP
+                                          </span>
+                                          {child.status === "completed" &&
+                                            child.isGraded !== false &&
+                                            child.grade &&
+                                            child.grade <= 4.0 && (
+                                              <span className="px-1 py-0.5 rounded bg-success/20 text-success border border-success/30 text-[10px] font-bold">
+                                                {child.grade.toFixed(1)}
+                                              </span>
+                                            )}
+                                        </div>
+                                      </div>
+
+                                      <div className="flex flex-wrap items-center gap-1.5 text-[9px] opacity-80 mt-1">
+                                        {(child.sws || 0) +
+                                          (child.exerciseSws || 0) >
+                                          0 && (
+                                          <span className="flex items-center gap-0.5 bg-surface/50 px-1 py-0.5 rounded border border-border/50">
+                                            <Clock className="w-2.5 h-2.5" />
+                                            {(child.sws || 0) +
+                                              (child.exerciseSws || 0)}{" "}
+                                            SWS
+                                          </span>
+                                        )}
+                                        {child.examType &&
+                                          child.examType !== "none" && (
+                                            <span className="flex items-center gap-0.5 bg-surface/50 px-1 py-0.5 rounded border border-border/50 capitalize">
+                                              {child.examType === "written" ? (
+                                                <FileText className="w-2.5 h-2.5" />
+                                              ) : (
+                                                <MessageCircle className="w-2.5 h-2.5" />
+                                              )}
+                                              {child.examType}
+                                            </span>
+                                          )}
+                                        {child.offeredIn &&
+                                          child.offeredIn !== "both" && (
+                                            <span className="flex items-center gap-0.5 bg-surface/50 px-1 py-0.5 rounded border border-border/50">
+                                              <Calendar className="w-2.5 h-2.5" />
+                                              {child.offeredIn}
+                                            </span>
+                                          )}
+                                      </div>
                                     </div>
                                   ))}
                                 </div>

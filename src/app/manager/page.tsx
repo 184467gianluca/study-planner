@@ -35,6 +35,11 @@ export default function CourseManager() {
 
   const [isEditing, setIsEditing] = useState<string | null>(null);
 
+  // Phase 16: Search and Filtering States
+  const [searchQuery, setSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+
   const [formData, setFormData] = useState({
     name: "",
     credits: "",
@@ -874,158 +879,226 @@ export default function CourseManager() {
           <CardHeader>
             <CardTitle>Your Courses</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {courses.length === 0 ? (
-              <p className="text-sm text-foreground-muted">
-                No courses added yet.
-              </p>
-            ) : (
-              courses.map((course) => (
-                <div
-                  key={course.id}
-                  className="flex flex-col bg-surface/50 border border-border rounded-lg p-4 group"
+          <CardContent className="space-y-6">
+            {/* Phase 16: Filter Controls */}
+            <div className="flex flex-col md:flex-row gap-3 bg-surface-hover/30 p-3 rounded-lg border border-border/50">
+              <div className="flex-1">
+                <Input
+                  placeholder="Search courses by name..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="bg-background"
+                />
+              </div>
+              <div className="flex gap-3">
+                <select
+                  value={categoryFilter}
+                  onChange={(e) => setCategoryFilter(e.target.value)}
+                  className="h-10 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors min-w-[140px]"
                 >
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <h4 className="font-semibold flex items-center gap-2">
-                        {course.name}
-                        {course.countsTowardsFinalGrade && (
-                          <span
-                            title="Counts towards B.Sc. Final Grade"
-                            className="flex items-center"
-                          >
-                            {course.compositeExamId && (
-                              <Link className="w-3 h-3 text-secondary mr-1" />
-                            )}
-                            🎓
-                          </span>
-                        )}
-                      </h4>
-                      <span
-                        className={`inline-block mt-1 text-xs px-2 py-0.5 rounded-full ${
-                          course.status === "completed"
-                            ? "bg-success/20 text-success"
-                            : course.status === "in-progress"
-                              ? "bg-primary/20 text-primary"
-                              : "bg-surface-hover text-foreground-muted"
-                        }`}
-                      >
-                        {course.status}
-                      </span>
-                    </div>
-                    <div className="flex">
-                      <Button
-                        variant="ghost"
-                        onClick={() => handleEditClick(course)}
-                        className="text-foreground-muted hover:text-primary hover:bg-primary/10 p-2 h-auto mr-1"
-                        aria-label="Edit course"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        onClick={() => deleteCourse(course.id)}
-                        className="text-foreground-muted hover:text-danger hover:bg-danger/10 p-2 h-auto"
-                        aria-label="Delete course"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="flex justify-between text-xs text-foreground-muted mt-2 items-center">
-                    <div className="flex gap-2 items-center">
-                      <span>{course.credits} Credits</span>
-                      {course.category && (
-                        <span className="capitalize px-1.5 py-0.5 rounded-sm bg-surface-hover opacity-80 text-[10px]">
-                          {course.category}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex flex-col text-right">
-                      <span>
-                        Semester {course.semester}
-                        <span className="text-[10px] ml-1 opacity-70">
-                          (
-                          {course.offeredIn === "WiSe"
-                            ? "WiSe"
-                            : course.offeredIn === "SoSe"
-                              ? "SoSe"
-                              : getSeasonForSemester(course.semester)}
-                          )
-                        </span>
-                      </span>
-                      <div className="text-[10px] text-foreground-muted mt-0.5 space-x-2">
-                        {course.sws !== undefined && (
-                          <span>{course.sws} SWS</span>
-                        )}
-                        {!course.isGraded && <span>Pass/Fail</span>}
-                        {course.isGraded && course.grade && (
-                          <span className="text-secondary font-medium">
-                            Grade: {course.grade.toFixed(1)}
-                          </span>
-                        )}
-                        {course.hasExercise &&
-                          course.admissionStatus === "pending" && (
-                            <span className="text-orange-400 font-medium">
-                              Zulassung Pending
-                            </span>
-                          )}
-                        {course.hasExercise &&
-                          course.admissionStatus === "granted" && (
-                            <span className="text-success font-medium">
-                              Zulassung Granted
-                            </span>
-                          )}
-                      </div>
-                      <div className="text-[10px] mt-0.5 space-x-2">
-                        {course.examType === "written" && (
-                          <span className="text-foreground-muted">
-                            Written Exam
-                          </span>
-                        )}
-                        {course.examType === "oral" && (
-                          <span className="text-foreground-muted">
-                            Oral Exam
-                          </span>
-                        )}
-                        {course.workloadMin && course.workloadMax && (
-                          <span className="text-foreground-muted">
-                            Workload: {course.workloadMin}-{course.workloadMax}
-                            h/wk
-                          </span>
-                        )}
+                  <option value="all">All Categories</option>
+                  <option value="meteorology">Meteorology (Core)</option>
+                  <option value="physics">Physics</option>
+                  <option value="math">Mathematics</option>
+                  <option value="elective">Elective Module</option>
+                </select>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="h-10 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors min-w-[140px]"
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="completed">Completed</option>
+                  <option value="in-progress">In Progress</option>
+                  <option value="planned">Planned</option>
+                </select>
+              </div>
+            </div>
 
-                        {course.examType !== "none" &&
-                          course.examAttemptsMax && (
-                            <span
-                              className={`font-medium ${
-                                course.examAttemptsMax -
-                                  (course.examAttemptsUsed || 0) <=
-                                1
-                                  ? "text-danger animate-pulse"
-                                  : "text-foreground-muted"
-                              }`}
-                            >
-                              Attempts: {course.examAttemptsUsed || 0}/
-                              {course.examAttemptsMax}
+            <div className="space-y-4">
+              {courses.length === 0 ? (
+                <p className="text-sm text-foreground-muted">
+                  No courses added yet.
+                </p>
+              ) : (
+                courses
+                  .filter((course) => {
+                    const matchesSearch = course.name
+                      .toLowerCase()
+                      .includes(searchQuery.toLowerCase());
+                    const matchesCategory =
+                      categoryFilter === "all" ||
+                      course.category === categoryFilter;
+                    const matchesStatus =
+                      statusFilter === "all" || course.status === statusFilter;
+                    return matchesSearch && matchesCategory && matchesStatus;
+                  })
+                  .map((course) => (
+                    <div
+                      key={course.id}
+                      className="flex flex-col bg-surface/50 border border-border rounded-lg p-4 group"
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <h4 className="font-semibold flex items-center gap-2">
+                            {course.name}
+                            {course.countsTowardsFinalGrade && (
+                              <span
+                                title="Counts towards B.Sc. Final Grade"
+                                className="flex items-center"
+                              >
+                                {course.compositeExamId && (
+                                  <Link className="w-3 h-3 text-secondary mr-1" />
+                                )}
+                                🎓
+                              </span>
+                            )}
+                          </h4>
+                          <span
+                            className={`inline-block mt-1 text-xs px-2 py-0.5 rounded-full ${
+                              course.status === "completed"
+                                ? "bg-success/20 text-success"
+                                : course.status === "in-progress"
+                                  ? "bg-primary/20 text-primary"
+                                  : "bg-surface-hover text-foreground-muted"
+                            }`}
+                          >
+                            {course.status}
+                          </span>
+                        </div>
+                        <div className="flex">
+                          <Button
+                            variant="ghost"
+                            onClick={() => handleEditClick(course)}
+                            className="text-foreground-muted hover:text-primary hover:bg-primary/10 p-2 h-auto mr-1"
+                            aria-label="Edit course"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            onClick={() => deleteCourse(course.id)}
+                            className="text-foreground-muted hover:text-danger hover:bg-danger/10 p-2 h-auto"
+                            aria-label="Delete course"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="flex justify-between text-xs text-foreground-muted mt-2 items-center">
+                        <div className="flex gap-2 items-center">
+                          <span>{course.credits} Credits</span>
+                          {course.category && (
+                            <span className="capitalize px-1.5 py-0.5 rounded-sm bg-surface-hover opacity-80 text-[10px]">
+                              {course.category}
                             </span>
                           )}
-                      </div>
-                      {course.parentModuleId &&
-                        courses.find((c) => c.id === course.parentModuleId) && (
-                          <span className="text-[10px] text-primary/70 mt-0.5">
-                            ↳{" "}
-                            {courses
-                              .find((c) => c.id === course.parentModuleId)
-                              ?.name.substring(0, 20)}
-                            ...
+                        </div>
+                        <div className="flex flex-col text-right">
+                          <span>
+                            Semester {course.semester}
+                            <span className="text-[10px] ml-1 opacity-70">
+                              (
+                              {course.offeredIn === "WiSe"
+                                ? "WiSe"
+                                : course.offeredIn === "SoSe"
+                                  ? "SoSe"
+                                  : getSeasonForSemester(course.semester)}
+                              )
+                            </span>
                           </span>
-                        )}
+                          <div className="text-[10px] text-foreground-muted mt-0.5 space-x-2">
+                            {course.sws !== undefined && (
+                              <span>{course.sws} SWS</span>
+                            )}
+                            {!course.isGraded && <span>Pass/Fail</span>}
+                            {course.isGraded && course.grade && (
+                              <span className="text-secondary font-medium">
+                                Grade: {course.grade.toFixed(1)}
+                              </span>
+                            )}
+                            {course.hasExercise &&
+                              course.admissionStatus === "pending" && (
+                                <span className="text-orange-400 font-medium">
+                                  Zulassung Pending
+                                </span>
+                              )}
+                            {course.hasExercise &&
+                              course.admissionStatus === "granted" && (
+                                <span className="text-success font-medium">
+                                  Zulassung Granted
+                                </span>
+                              )}
+                          </div>
+                          <div className="text-[10px] mt-0.5 space-x-2">
+                            {course.examType === "written" && (
+                              <span className="text-foreground-muted">
+                                Written Exam
+                              </span>
+                            )}
+                            {course.examType === "oral" && (
+                              <span className="text-foreground-muted">
+                                Oral Exam
+                              </span>
+                            )}
+                            {course.workloadMin && course.workloadMax && (
+                              <span className="text-foreground-muted">
+                                Workload: {course.workloadMin}-
+                                {course.workloadMax}
+                                h/wk
+                              </span>
+                            )}
+
+                            {course.examType !== "none" &&
+                              course.examAttemptsMax && (
+                                <span
+                                  className={`font-medium ${
+                                    course.examAttemptsMax -
+                                      (course.examAttemptsUsed || 0) <=
+                                    1
+                                      ? "text-danger animate-pulse"
+                                      : "text-foreground-muted"
+                                  }`}
+                                >
+                                  Attempts: {course.examAttemptsUsed || 0}/
+                                  {course.examAttemptsMax}
+                                </span>
+                              )}
+                          </div>
+                          {course.parentModuleId &&
+                            courses.find(
+                              (c) => c.id === course.parentModuleId,
+                            ) && (
+                              <span className="text-[10px] text-primary/70 mt-0.5">
+                                ↳{" "}
+                                {courses
+                                  .find((c) => c.id === course.parentModuleId)
+                                  ?.name.substring(0, 20)}
+                                ...
+                              </span>
+                            )}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              ))
-            )}
+                  ))
+              )}
+              {courses.length > 0 &&
+                courses.filter((course) => {
+                  const matchesSearch = course.name
+                    .toLowerCase()
+                    .includes(searchQuery.toLowerCase());
+                  const matchesCategory =
+                    categoryFilter === "all" ||
+                    course.category === categoryFilter;
+                  const matchesStatus =
+                    statusFilter === "all" || course.status === statusFilter;
+                  return matchesSearch && matchesCategory && matchesStatus;
+                }).length === 0 && (
+                  <p className="text-sm text-foreground-muted text-center py-4">
+                    No courses match your active filters.
+                  </p>
+                )}
+            </div>
           </CardContent>
         </Card>
       </div>
