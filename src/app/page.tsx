@@ -206,14 +206,24 @@ export default function Dashboard() {
     0,
   );
 
-  // Phase 22: Category Distribution
-  // Define stable colors for known categories, and a fallback palette for custom ones
+  // Phase 22.1: Category Distribution (Dynamic Colors)
+  // Define stable, curated colors for known categories.
   const CATEGORY_COLORS: Record<string, string> = {
     meteorologie: "rgb(0, 229, 255)", // primary
     physik: "rgb(168, 85, 247)", // purple
     mathe: "rgb(249, 115, 22)", // orange
     it: "rgb(34, 197, 94)", // success
     other: "rgb(100, 116, 139)", // slate (fallback)
+  };
+
+  // Helper function to generate a distinct pseudo-random HSL color from a string
+  const getDynamicColor = (str: string) => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const h = Math.abs(hash) % 360;
+    return `hsl(${h}, 70%, 60%)`;
   };
 
   const categoryCPMap = new Map<string, number>();
@@ -235,8 +245,12 @@ export default function Dashboard() {
     .map(([cat, cp]) => {
       const percentage =
         totalCurriculumCP > 0 ? (cp / totalCurriculumCP) * 100 : 0;
-      const color = CATEGORY_COLORS[cat] || CATEGORY_COLORS["other"];
-      // For CSS conic-gradient, we need the start and end angle
+      
+      // Look up stable color, or generate a unique one for custom categories
+      const color = CATEGORY_COLORS[cat] || getDynamicColor(cat);
+      
+      // For CSS conic-gradient, we need the start and end angle.
+      // E.g., "red 0% 20%, blue 20% 50%" creates hard stops.
       const startAngle = currentConicAngle;
       const endAngle = currentConicAngle + percentage;
       currentConicAngle = endAngle;
@@ -246,7 +260,7 @@ export default function Dashboard() {
         cp,
         percentage,
         color,
-        gradientString: `${color} ${startAngle}%, ${color} ${endAngle}%`,
+        gradientString: `${color} ${startAngle}% ${endAngle}%`,
       };
     })
     .sort((a, b) => b.cp - a.cp); // Sort largest to smallest
