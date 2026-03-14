@@ -11,6 +11,7 @@ import {
   AlertCircle,
   FileText,
   Info,
+  PieChart, // Added icon for Dashboard Card
 } from "lucide-react";
 import { Course } from "@/types/course";
 
@@ -204,6 +205,53 @@ export default function Dashboard() {
     (acc, c) => acc + (c.workloadMax || 0),
     0,
   );
+
+  // Phase 22: Category Distribution
+  // Define stable colors for known categories, and a fallback palette for custom ones
+  const CATEGORY_COLORS: Record<string, string> = {
+    meteorologie: "rgb(0, 229, 255)", // primary
+    physik: "rgb(168, 85, 247)", // purple
+    mathe: "rgb(249, 115, 22)", // orange
+    it: "rgb(34, 197, 94)", // success
+    other: "rgb(100, 116, 139)", // slate (fallback)
+  };
+
+  const categoryCPMap = new Map<string, number>();
+  let totalCurriculumCP = 0;
+
+  courses
+    .filter((c) => !c.isContainer)
+    .forEach((c) => {
+      // Normalize string so 'IT' and 'it' group together, default to 'other'
+      const cat = c.category ? c.category.trim().toLowerCase() : "other";
+      const current = categoryCPMap.get(cat) || 0;
+      categoryCPMap.set(cat, current + (c.credits || 0));
+      totalCurriculumCP += c.credits || 0;
+    });
+
+  // Convert to array and calculate percentages + conic gradient segments
+  let currentConicAngle = 0;
+  const categoryStats = Array.from(categoryCPMap.entries())
+    .map(([cat, cp]) => {
+      const percentage =
+        totalCurriculumCP > 0 ? (cp / totalCurriculumCP) * 100 : 0;
+      const color = CATEGORY_COLORS[cat] || CATEGORY_COLORS["other"];
+      // For CSS conic-gradient, we need the start and end angle
+      const startAngle = currentConicAngle;
+      const endAngle = currentConicAngle + percentage;
+      currentConicAngle = endAngle;
+
+      return {
+        name: cat,
+        cp,
+        percentage,
+        color,
+        gradientString: `${color} ${startAngle}%, ${color} ${endAngle}%`,
+      };
+    })
+    .sort((a, b) => b.cp - a.cp); // Sort largest to smallest
+
+  const conicGradient = categoryStats.map((s) => s.gradientString).join(", ");
 
   // Phase 4 Metrics: Exam Attempts
   const criticalExams = courses.filter(
@@ -652,6 +700,58 @@ export default function Dashboard() {
               Exams with ≤ 1 attempt remaining across all planned & active
               courses.
             </p>
+          </CardContent>
+        </Card>
+
+        {/* Phase 22: Category Distribution Pie Chart */}
+        <Card className="bg-surface/60 border-primary/20 hover:border-primary/50 transition-colors relative z-10 hover:z-50 md:col-span-2 lg:col-span-3 mt-4">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-foreground-muted flex items-center gap-2">
+              <PieChart className="h-4 w-4 text-primary" />
+              Category Distribution
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col sm:flex-row items-center gap-8 py-4">
+            {/* Pie Chart Graphic */}
+            <div
+              className="w-40 h-40 rounded-full shrink-0 shadow-[0_0_15px_rgba(0,0,0,0.5)] border border-border/50 relative overflow-hidden"
+              style={{
+                background: `conic-gradient(${conicGradient})`,
+              }}
+            >
+              {/* Inner cutout to make it a donut chart (optional, looks better) */}
+              <div className="absolute inset-[15%] rounded-full bg-surface/95 backdrop-blur-md shadow-inner flex items-center justify-center flex-col">
+                <span className="text-xl font-bold text-foreground">
+                  {totalCurriculumCP}
+                </span>
+                <span className="text-[10px] text-foreground-muted uppercase tracking-wider">
+                  Total CP
+                </span>
+              </div>
+            </div>
+
+            {/* Legend */}
+            <div className="flex-1 w-full grid grid-cols-2 md:grid-cols-3 gap-y-3 gap-x-6">
+              {categoryStats.map((stat, idx) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <div
+                    className="w-3 h-3 rounded-full shrink-0"
+                    style={{ backgroundColor: stat.color }}
+                  />
+                  <div className="overflow-hidden">
+                    <p
+                      className="text-xs font-semibold text-foreground truncate capitalize"
+                      title={stat.name}
+                    >
+                      {stat.name}
+                    </p>
+                    <p className="text-[10px] text-foreground-muted">
+                      {stat.cp} CP ({stat.percentage.toFixed(1)}%)
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
       </div>
