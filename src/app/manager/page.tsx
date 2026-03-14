@@ -516,7 +516,7 @@ export default function CourseManager() {
                 )}
                 <div className={formData.isContainer ? "col-span-1" : ""}>
                   <Label htmlFor="category">Category (Theme)</Label>
-                  <Input
+                  <input
                     id="category"
                     list="category-options"
                     value={formData.category}
@@ -525,6 +525,7 @@ export default function CourseManager() {
                     }
                     placeholder="e.g. meteorologie, physik, mathe, IT..."
                     required
+                    className="mt-1 flex h-10 w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors"
                   />
                   <datalist id="category-options">
                     {allCategories.map((cat) => (
