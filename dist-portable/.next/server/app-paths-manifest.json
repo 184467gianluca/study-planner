@@ -1,6 +1,7 @@
 {
   "/_global-error/page": "app/_global-error/page.js",
   "/_not-found/page": "app/_not-found/page.js",
+  "/api/versions/route": "app/api/versions/route.js",
   "/builder/page": "app/builder/page.js",
   "/favicon.ico/route": "app/favicon.ico/route.js",
   "/manager/page": "app/manager/page.js",

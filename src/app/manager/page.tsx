@@ -147,7 +147,7 @@ export default function CourseManager() {
       credits: "",
       semester: "",
       containerSemesters: "",
-      category: "meteorology",
+      category: "meteorologie",
       parentModuleId: "none",
       sws: "",
       grade: "",
@@ -176,7 +176,7 @@ export default function CourseManager() {
       containerSemesters: course.containerSemesters
         ? course.containerSemesters.join(", ")
         : "",
-      category: course.category || "meteorology",
+      category: course.category || "meteorologie",
       parentModuleId: course.parentModuleId || "none",
       sws: course.sws !== undefined ? String(course.sws) : "",
       grade: course.grade !== undefined ? String(course.grade) : "",
@@ -255,6 +255,14 @@ export default function CourseManager() {
     };
     reader.readAsText(file);
   };
+
+  // Compute unique categories to power the datalist recommendations
+  const customCategories = courses
+    .map((c) => c.category)
+    .filter(Boolean) as string[];
+  const allCategories = Array.from(
+    new Set(["meteorologie", "physik", "mathe", "IT", ...customCategories]),
+  );
 
   return (
     <div className="space-y-6">
@@ -507,21 +515,22 @@ export default function CourseManager() {
                   </div>
                 )}
                 <div className={formData.isContainer ? "col-span-1" : ""}>
-                  {" "}
                   <Label htmlFor="category">Category (Theme)</Label>
-                  <select
+                  <Input
                     id="category"
+                    list="category-options"
                     value={formData.category}
                     onChange={(e) =>
                       setFormData({ ...formData, category: e.target.value })
                     }
-                    className="mt-1 flex h-10 w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors"
-                  >
-                    <option value="meteorology">Meteorology (Core)</option>
-                    <option value="physics">Physics</option>
-                    <option value="math">Mathematics</option>
-                    <option value="elective">Elective Module</option>
-                  </select>
+                    placeholder="e.g. meteorologie, physik, mathe, IT..."
+                    required
+                  />
+                  <datalist id="category-options">
+                    {allCategories.map((cat) => (
+                      <option key={cat} value={cat} />
+                    ))}
+                  </datalist>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">

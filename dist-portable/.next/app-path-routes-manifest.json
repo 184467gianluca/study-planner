@@ -1,6 +1,7 @@
 {
   "/_global-error/page": "/_global-error",
   "/_not-found/page": "/_not-found",
+  "/api/versions/route": "/api/versions",
   "/builder/page": "/builder",
   "/favicon.ico/route": "/favicon.ico",
   "/manager/page": "/manager",
